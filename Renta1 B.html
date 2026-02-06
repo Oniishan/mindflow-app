@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindFlow AI - MVP Coach Productivité</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        
+        .task-checkbox:checked + div {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+        
+        .admin-panel {
+            background: #0f172a;
+            border-left: 3px solid #6366f1;
+        }
+        
+        .console-line {
+            border-left: 2px solid transparent;
+            padding-left: 8px;
+            margin: 2px 0;
+        }
+        
+        .console-line:hover {
+            border-left-color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+
+    <!-- AUTHENTIFICATION -->
+    <div id="authScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900">
+        <div class="w-full max-w-md p-8 glass rounded-2xl border border-white/10 m-4">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-500/30">
+                    <span class="text-2xl font-bold">M</span>
+                </div>
+                <h1 class="text-2xl font-bold gradient-text">MindFlow AI</h1>
+                <p class="text-gray-400 text-sm mt-2">MVP Coach Productivité</p>
+            </div>
+            
+            <div id="loginForm">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                        <input type="email" id="loginEmail" class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-white/10 focus:border-indigo-500 focus:outline-none transition" placeholder="vous@exemple.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Mot de passe</label>
+                        <input type="password" id="loginPassword" class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-white/10 focus:border-indigo-500 focus:outline-none transition" placeholder="••••••••">
+                    </div>
+                    <button onclick="handleLogin()" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-indigo-500/25 transition transform hover:scale-[1.02]">
+                        Connexion
+                    </button>
+                </div>
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-gray-400">Pas encore de compte ? <button onclick="showRegister()" class="text-indigo-400 hover:text-indigo-300 font-medium">S'inscrire</button></p>
+                </div>
+                <div class="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                    <p class="text-xs text-yellow-200 text-center">👤 Compte Démo : user@demo.com / demo123</p>
+                    <p class="text-xs text-red-300 text-center mt-1">🔒 Admin : admin@mindflow.ai (sécurisé)</p>
+                </div>
+            </div>
+
+            <div id="registerForm" class="hidden">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nom</label>
+                        <input type="text" id="regName" class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-white/10 focus:border-indigo-500 focus:outline-none transition" placeholder="Jean Dupont">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                        <input type="email" id="regEmail" class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-white/10 focus:border-indigo-500 focus:outline-none transition" placeholder="vous@exemple.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Mot de passe</label>
+                        <input type="password" id="regPassword" class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-white/10 focus:border-indigo-500 focus:outline-none transition" placeholder="••••••••">
+                    </div>
+                    <button onclick="handleRegister()" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg font-semibold hover:shadow-lg transition">
+                        Créer mon compte
+                    </button>
+                </div>
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-gray-400">Déjà inscrit ? <button onclick="showLogin()" class="text-indigo-400 hover:text-indigo-300 font-medium">Se connecter</button></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP PRINCIPALE (cachée par défaut) -->
+    <div id="mainApp" class="hidden">
+        <!-- Navigation -->
+        <nav class="fixed w-full z-40 glass border-b border-white/10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <span class="font-bold text-sm">M</span>
+                        </div>
+                        <span class="font-bold text-lg hidden sm:block">MindFlow AI</span>
+                        <span id="userBadge" class="hidden px-2 py-1 bg-indigo-500/20 text-indigo-300 text-xs rounded-full border border-indigo-500/30">PRO</span>
+                        <span id="adminBadge" class="hidden px-2 py-1 bg-red-500/20 text-red-300 text-xs rounded-full border border-red-500/30 ml-2">ADMIN</span>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <button onclick="openAIChat()" class="p-2 rounded-lg hover:bg-white/5 transition relative">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                            <span class="absolute top-1 right-1 w-2 h-2 bg-green-400 rounded-full pulse-ring"></span>
+                        </button>
+                        
+                        <button onclick="toggleAdminPanel()" id="adminBtn" class="hidden p-2 rounded-lg hover:bg-red-500/20 text-red-400 transition" title="Console Admin">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </button>
+
+                        <div class="relative group">
+                            <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5 transition">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-sm font-bold" id="userAvatar">JD</div>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-48 glass rounded-lg border border-white/10 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                <div class="p-3 border-b border-white/10">
+                                    <p class="font-medium text-sm" id="userNameDisplay">Jean Dupont</p>
+                                    <p class="text-xs text-gray-400" id="userEmailDisplay">jean@exemple.com</p>
+                                </div>
+                                <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/5 transition">Déconnexion</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ADMIN PANEL (Caché par défaut) -->
+        <div id="adminPanel" class="fixed inset-y-0 right-0 w-full md:w-96 admin-panel transform translate-x-full transition-transform duration-300 z-50 shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center bg-slate-900/50">
+                <div>
+                    <h2 class="text-xl font-bold text-red-400 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        Console Admin
+                    </h2>
+                    <p class="text-xs text-gray-400 mono mt-1">Accès Root Sécurisé</p>
+                </div>
+                <button onclick="toggleAdminPanel()" class="p-2 hover:bg-white/5 rounded-lg transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6 space-y-6">
+                <!-- Sécurité -->
+                <div class="glass rounded-lg p-4 border border-red-500/20">
+                    <h3 class="font-semibold mb-3 flex items-center gap-2 text-red-300">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        Changement Mot de Passe
+                    </h3>
+                    <div class="space-y-3">
+                        <input type="password" id="currentAdminPass" placeholder="Mot de passe actuel" class="w-full px-3 py-2 bg-slate-800 rounded border border-white/10 text-sm focus:border-red-500 focus:outline-none">
+                        <input type="password" id="newAdminPass" placeholder="Nouveau mot de passe" class="w-full px-3 py-2 bg-slate-800 rounded border border-white/10 text-sm focus:border-red-500 focus:outline-none">
+                        <input type="password" id="confirmAdminPass" placeholder="Confirmer le nouveau" class="w-full px-3 py-2 bg-slate-800 rounded border border-white/10 text-sm focus:border-red-500 focus:outline-none">
+                        <button onclick="changeAdminPassword()" class="w-full py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium transition">Mettre à jour le mot de passe</button>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="glass rounded-lg p-3 text-center border border-white/5">
+                        <div class="text-2xl font-bold text-indigo-400" id="adminUserCount">0</div>
+                        <div class="text-xs text-gray-400">Utilisateurs</div>
+                    </div>
+                    <div class="glass rounded-lg p-3 text-center border border-white/5">
+                        <div class="text-2xl font-bold text-green-400" id="adminActiveToday">0</div>
+                        <div class="text-xs text-gray-400">Actifs Aujourd'hui</div>
+                    </div>
+                    <div class="glass rounded-lg p-3 text-center border border-white/5">
+                        <div class="text-2xl font-bold text-purple-400" id="adminTasksTotal">0</div>
+                        <div class="text-xs text-gray-400">Tâches Créées</div>
+                    </div>
+                    <div class="glass rounded-lg p-3 text-center border border-white/5">
+                        <div class="text-2xl font-bold text-yellow-400" id="adminRevenue">€0</div>
+                        <div class="text-xs text-gray-400">Revenus Potentiels</div>
+                    </div>
+                </div>
+
+                <!-- Logs Console -->
+                <div>
+                    <h3 class="font-semibold mb-2 text-sm text-gray-300 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Logs Système
+                    </h3>
+                    <div class="bg-black/50 rounded-lg p-3 mono text-xs h-48 overflow-y-auto space-y-1" id="adminLogs">
+                        <div class="console-line text-green-400">> Système initialisé...</div>
+                        <div class="console-line text-gray-400">> En attente de connexion...</div>
+                    </div>
+                    <div class="mt-2 flex gap-2">
+                        <input type="text" id="adminCommand" placeholder="Commande..." class="flex-1 px-3 py-2 bg-slate-800 rounded border border-white/10 text-sm mono focus:outline-none focus:border-indigo-500" onkeypress="if(event.key==='Enter')executeAdminCommand()">
+                        <button onclick="executeAdminCommand()" class="px-4 py-2 bg-indigo-600 rounded text-sm hover:bg-indigo-700 transition">Exécuter</button>
+                    </div>
+                </div>
+
+                <!-- Data Monetization Toggle (Feature Flag) -->
+                <div class="glass rounded-lg p-4 border border-yellow-500/20 bg-yellow-500/5">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-semibold text-yellow-200 text-sm">Data Monetization</h3>
+                        <span class="text-xs bg-red-500/20 text-red-300 px-2 py-1 rounded">BETA</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-3">Activer uniquement après 10k utilisateurs</p>
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleDataMonetization()" id="dataMonetizationBtn" class="flex-1 py-2 bg-slate-700 rounded text-sm text-gray-400 cursor-not-allowed" disabled>
+                            Verrouillé (0/10k users)
+                        </button>
+                    </div>
+                    <div class="mt-2 w-full bg-slate-800 rounded-full h-2">
+                        <div class="bg-yellow-500 h-2 rounded-full progress-bar" style="width: 0%" id="dataProgress"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1 text-center" id="dataProgressText">0% - Seuil: 10,000 utilisateurs</p>
+                </div>
+
+                <!-- Export -->
+                <button onclick="exportData()" class="w-full py-2 border border-white/10 rounded-lg text-sm hover:bg-white/5 transition flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Exporter les données (JSON)
+                </button>
+            </div>
+        </div>
+
+        <!-- CHAT IA OVERLAY -->
+        <div id="aiChat" class="fixed inset-0 z-30 hidden bg-black/80 backdrop-blur-sm" onclick="if(event.target===this)closeAIChat()">
+            <div class="absolute bottom-0 right-0 w-full md:w-[500px] h-full md:h-[600px] md:m-4 bg-slate-900 md:rounded-2xl border border-white/10 shadow-2xl flex flex-col slide-in">
+                <div class="p-4 border-b border-white/10 flex justify-between items-center bg-gradient-to-r from-indigo-600/20 to-purple-600/20">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">Coach MindFlow</h3>
+                            <p class="text-xs text-green-400 flex items-center gap-1">
+                                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                                En ligne
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="closeAIChat()" class="p-2 hover:bg-white/5 rounded-lg transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chatMessages">
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex-shrink-0 flex items-center justify-center text-xs font-bold">IA</div>
+                        <div class="glass rounded-2xl rounded-tl-none p-3 max-w-[80%]">
+                            <p class="text-sm">Bonjour ! Je suis votre coach IA personnel. Je peux vous aider à :</p>
+                            <ul class="text-sm mt-2 space-y-1 text-gray-300 list-disc list-inside">
+                                <li>Organiser vos tâches prioritaires</li>
+                                <li>Analyser votre productivité</li>
+                                <li>Suggérer des routines optimisées</li>
+                                <li>Répondre à vos questions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 border-t border-white/10">
+                    <div class="flex gap-2">
+                        <input type="text" id="chatInput" placeholder="Posez votre question..." class="flex-1 px-4 py-3 rounded-xl bg-slate-800 border border-white/10 focus:border-indigo-500 focus:outline-none transition" onkeypress="if(event.key==='Enter')sendMessage()">
+                        <button onclick="sendMessage()" class="p-3 bg-indigo-600 rounded-xl hover:bg-indigo-700 transition">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <main class="pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-3 gap-6">
+                
+                <!-- COLONNE GAUCHE : Dashboard -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Header -->
+                    <div class="glass rounded-2xl p-6 border border-white/10">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h1 class="text-3xl font-bold mb-1">Bonjour, <span id="dashboardName">Jean</span> !</h1>
+                                <p class="text-gray-400" id="currentDate">Lundi 7 Février 2025</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-3xl font-bold gradient-text" id="productivityScore">85%</div>
+                                <p class="text-sm text-gray-400">Score Productivité</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Bars -->
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-300">Objectifs journaliers</span>
+                                    <span class="text-indigo-400" id="dailyProgress">3/5</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full progress-bar" style="width: 60%" id="dailyBar"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-300">Focus Time</span>
+                                    <span class="text-purple-400">2h 45m / 4h</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full progress-bar" style="width: 68%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tâches -->
+                    <div class="glass rounded-2xl p-6 border border-white/10">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                                Mes Tâches
+                            </h2>
+                            <button onclick="openAddTask()" class="p-2 bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            </button>
+                        </div>
+
+                        <div class="space-y-2" id="taskList">
+                            <!-- Les tâches seront injectées ici -->
+                        </div>
+
+                        <div id="addTaskForm" class="hidden mt-4 p-4 bg-slate-800/50 rounded-lg border border-white/5">
+                            <input type="text" id="newTaskInput" placeholder="Nouvelle tâche..." class="w-full px-3 py-2 bg-slate-800 rounded border border-white/10 mb-2 focus:border-indigo-500 focus:outline-none">
+                            <div class="flex gap-2">
+                                <select id="newTaskPriority" class="px-3 py-2 bg-slate-800 rounded border border-white/10 text-sm focus:border-indigo-500 focus:outline-none">
+                                    <option value="high">Haute priorité</option>
+                                    <option value="medium" selected>Moyenne</option>
+                                    <option value="low">Basse</option>
+                                </select>
+                                <button onclick="addTask()" class="flex-1 bg-indigo-600 rounded text-sm font-medium hover:bg-indigo-700 transition">Ajouter</button>
+                                <button onclick="closeAddTask()" class="px-4 py-2 border border-white/10 rounded text-sm hover:bg-white/5 transition">Annuler</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics -->
+                    <div class="glass rounded-2xl p-6 border border-white/10">
+                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            Analytics Hebdomadaires
+                        </h2>
+                        <div class="grid grid-cols-7 gap-2 h-32 items-end" id="weeklyChart">
+                            <!-- Bars générées par JS -->
+                        </div>
+                        <div class="flex justify-between mt-2 text-xs text-gray-500">
+                            <span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLONNE DROITE : Sidebar -->
+                <div class="space-y-6">
+                    <!-- Timer Pomodoro -->
+                    <div class="glass rounded-2xl p-6 border border-white/10 text-center">
+                        <h3 class="text-lg font-semibold mb-4">Focus Timer</h3>
+                        <div class="text-5xl font-bold mono mb-4 gradient-text" id="timerDisplay">25:00</div>
+                        <div class="flex justify-center gap-2">
+                            <button onclick="toggleTimer()" id="timerBtn" class="px-6 py-2 bg-indigo-600 rounded-lg font-medium hover:bg-indigo-700 transition">Démarrer</button>
+                            <button onclick="resetTimer()" class="px-4 py-2 border border-white/10 rounded-lg hover:bg-white/5 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            </button>
+                        </div>
+                        <div class="mt-4 flex justify-center gap-2 text-xs">
+                            <button onclick="setTimer(25)" class="px-3 py-1 rounded bg-white/5 hover:bg-white/10 transition">25m</button>
+                            <button onclick="setTimer(45)" class="px-3 py-1 rounded bg-white/5 hover:bg-white/10 transition">45m</button>
+                            <button onclick="setTimer(60)" class="px-3 py-1 rounded bg-white/5 hover:bg-white/10 transition">60m</button>
+                        </div>
+                    </div>
+
+                    <!-- Conseil IA -->
+                    <div class="glass rounded-2xl p-6 border border-white/10 bg-gradient-to-br from-indigo-600/10 to-purple-600/10">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></div>
+                            <h3 class="font-semibold text-sm text-indigo-300">Conseil du Coach</h3>
+                        </div>
+                        <p class="text-sm text-gray-300 italic" id="aiTip">"Votre pic de productivité est généralement entre 9h et 11h. Réservez ce créneau pour vos tâches les plus importantes."</p>
+                    </div>
+
+                    <!-- Streak -->
+                    <div class="glass rounded-2xl p-6 border border-white/10 text-center">
+                        <div class="text-4xl mb-2">🔥</div>
+                        <div class="text-3xl font-bold text-orange-400" id="streakCount">12</div>
+                        <p class="text-sm text-gray-400">jours consécutifs</p>
+                    </div>
+
+                    <!-- Upgrade CTA (Freemium) -->
+                    <div class="rounded-2xl p-6 bg-gradient-to-br from-indigo-600 to-purple-700 border border-indigo-400/30 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 -mt-2 -mr-2 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
+                        <h3 class="font-bold mb-2 relative z-10">Passez à Pro</h3>
+                        <ul class="text-sm space-y-2 mb-4 relative z-10 text-indigo-100">
+                            <li class="flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>IA illimitée</li>
+                            <li class="flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Analytics avancés</li>
+                            <li class="flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Export données</li>
+                        </ul>
+                        <button onclick="showUpgradeModal()" class="w-full py-2 bg-white text-indigo-600 rounded-lg font-bold text-sm hover:shadow-lg transition relative z-10">
+                            Découvrir Pro
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ==================== AUTHENTIFICATION & DONNÉES ====================
+        
+        // Stockage local simulé (en production: backend sécurisé)
+        const DB = {
+            users: JSON.parse(localStorage.getItem('mindflow_users')) || [
+                { id: 1, name: 'Admin', email: 'admin@mindflow.ai', password: 'admin123', role: 'admin', createdAt: new Date().toISOString() },
+                { id: 2, name: 'Utilisateur Démo', email: 'user@demo.com', password: 'demo123', role: 'user', createdAt: new Date().toISOString() }
+            ],
+            tasks: JSON.parse(localStorage.getItem('mindflow_tasks')) || [
+                { id: 1, userId: 2, text: 'Réviser présentation client', completed: false, priority: 'high', createdAt: new Date().toISOString() },
+                { id: 2, userId: 2, text: 'Sport 30 minutes', completed: true, priority: 'medium', createdAt: new Date().toISOString() },
+                { id: 3, userId: 2, text: 'Lire 20 pages', completed: false, priority: 'low', createdAt: new Date().toISOString() }
+            ],
+            sessions: JSON.parse(localStorage.getItem('mindflow_sessions')) || [],
+            settings: JSON.parse(localStorage.getItem('mindflow_settings')) || {
+                dataMonetizationEnabled: false,
+                userThreshold: 10000
+            }
+        };
+
+        let currentUser = null;
+        let timerInterval = null;
+        let timerSeconds = 1500; // 25 minutes
+        let isTimerRunning = false;
+
+        // Sauvegarde DB
+        function saveDB() {
+            localStorage.setItem('mindflow_users', JSON.stringify(DB.users));
+            localStorage.setItem('mindflow_tasks', JSON.stringify(DB.tasks));
+            localStorage.setItem('mindflow_settings', JSON.stringify(DB.settings));
+        }
+
+        // ==================== AUTH FUNCTIONS ====================
+
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+
+        function handleRegister() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            if (!name || !email || !password) {
+                alert('Veuillez remplir tous les champs');
+                return;
+            }
+
+            if (DB.users.find(u => u.email === email)) {
+                alert('Cet email est déjà utilisé');
+                return;
+            }
+
+            const newUser = {
+                id: Date.now(),
+                name,
+                email,
+                password, // En prod: hashé !
+                role: 'user',
+                createdAt: new Date().toISOString()
+            };
+
+            DB.users.push(newUser);
+            saveDB();
+            logAdmin(`Nouvel utilisateur inscrit: ${email}`);
+            
+            alert('Compte créé avec succès ! Vous pouvez maintenant vous connecter.');
+            showLogin();
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const user = DB.users.find(u => u.email === email && u.password === password);
+
+            if (!user) {
+                alert('Email ou mot de passe incorrect');
+                return;
+            }
+
+            currentUser = user;
+            localStorage.setItem('mindflow_current_user', JSON.stringify(user));
+            
+            // Log session
+            DB.sessions.push({
+                userId: user.id,
+                loginAt: new Date().toISOString(),
+                userAgent: navigator.userAgent
+            });
+            localStorage.setItem('mindflow_sessions', JSON.stringify(DB.sessions));
+
+            if (user.role === 'admin') {
+                logAdmin(`🔒 Connexion ADMIN: ${email} - IP: ${navigator.userAgent}`);
+            }
+
+            initApp();
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('mindflow_current_user');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('adminPanel').classList.add('translate-x-full');
+            showLogin();
+        }
+
+        // ==================== INITIALISATION APP ====================
+
+        function initApp() {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+
+            // UI User
+            document.getElementById('userNameDisplay').textContent = currentUser.name;
+            document.getElementById('userEmailDisplay').textContent = currentUser.email;
+            document.getElementById('dashboardName').textContent = currentUser.name.split(' ')[0];
+            document.getElementById('userAvatar').textContent = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            
+            // Date
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('fr-FR', options);
+
+            // Admin?
+            if (currentUser.role === 'admin') {
+                document.getElementById('adminBadge').classList.remove('hidden');
+                document.getElementById('adminBtn').classList.remove('hidden');
+                initAdminPanel();
+            } else {
+                document.getElementById('userBadge').classList.remove('hidden');
+            }
+
+            loadTasks();
+            generateWeeklyChart();
+            rotateAITips();
+        }
+
+        // ==================== TASKS MANAGEMENT ====================
+
+        function loadTasks() {
+            const userTasks = DB.tasks.filter(t => t.userId === currentUser.id);
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+
+            userTasks.forEach(task => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-3 p-3 rounded-lg bg-slate-800/30 border border-white/5 hover:border-white/10 transition group';
+                div.innerHTML = `
+                    <input type="checkbox" class="task-checkbox w-5 h-5 rounded border-white/20 bg-slate-800 text-indigo-600 focus:ring-indigo-500" 
+                        ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})">
+                    <div class="flex-1 ${task.completed ? 'line-through opacity-50' : ''}">
+                        <p class="text-sm font-medium">${task.text}</p>
+                        <span class="text-xs px-2 py-0.5 rounded-full ${getPriorityColor(task.priority)}">${task.priority}</span>
+                    </div>
+                    <button onclick="deleteTask(${task.id})" class="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 rounded transition">
+                        <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                `;
+                taskList.appendChild(div);
+            });
+
+            updateProgress(userTasks);
+        }
+
+        function getPriorityColor(priority) {
+            const colors = {
+                high: 'bg-red-500/20 text-red-300',
+                medium: 'bg-yellow-500/20 text-yellow-300',
+                low: 'bg-green-500/20 text-green-300'
+            };
+            return colors[priority] || colors.medium;
+        }
+
+        function updateProgress(tasks) {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            const percent = total > 0 ? (completed / total) * 100 : 0;
+            
+            document.getElementById('dailyProgress').textContent = `${completed}/${total}`;
+            document.getElementById('dailyBar').style.width = `${percent}%`;
+            document.getElementById('productivityScore').textContent = `${Math.round(percent)}%`;
+        }
+
+        function openAddTask() {
+            document.getElementById('addTaskForm').classList.remove('hidden');
+            document.getElementById('newTaskInput').focus();
+        }
+
+        function closeAddTask() {
+            document.getElementById('addTaskForm').classList.add('hidden');
+            document.getElementById('newTaskInput').value = '';
+        }
+
+        function addTask() {
+            const text = document.getElementById('newTaskInput').value;
+            const priority = document.getElementById('newTaskPriority').value;
+            
+            if (!text) return;
+
+            DB.tasks.push({
+                id: Date.now(),
+                userId: currentUser.id,
+                text,
+                priority,
+                completed: false,
+                createdAt: new Date().toISOString()
+            });
+            
+            saveDB();
+            loadTasks();
+            closeAddTask();
+            
+            if (currentUser.role === 'admin') {
+                logAdmin(`Tâche ajoutée par ${currentUser.email}: ${text}`);
+            }
+        }
+
+        function toggleTask(id) {
+            const task = DB.tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveDB();
+                loadTasks();
+            }
+        }
+
+        function deleteTask(id) {
+            DB.tasks = DB.tasks.filter(t => t.id !== id);
+            saveDB();
+            loadTasks();
+        }
+
+        // ==================== TIMER POMODORO ====================
+
+        function toggleTimer() {
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                document.getElementById('timerBtn').textContent = 'Démarrer';
+                document.getElementById('timerBtn').classList.remove('bg-red-600');
+                document.getElementById('timerBtn').classList.add('bg-indigo-600');
+            } else {
+                isTimerRunning = true;
+                document.getElementById('timerBtn').textContent = 'Pause';
+                document.getElementById('timerBtn').classList.remove('bg-indigo-600');
+                document.getElementById('timerBtn').classList.add('bg-red-600');
+                
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        isTimerRunning = false;
+                        alert('Temps écoulé ! Prenez une pause.');
+                        document.getElementById('timerBtn').textContent = 'Démarrer';
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerSeconds = 1500;
+            updateTimerDisplay();
+            document.getElementById('timerBtn').textContent = 'Démarrer';
+            document.getElementById('timerBtn').classList.remove('bg-red-600');
+            document.getElementById('timerBtn').classList.add('bg-indigo-600');
+        }
+
+        function setTimer(minutes) {
+            resetTimer();
+            timerSeconds = minutes * 60;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timerSeconds / 60);
+            const secs = timerSeconds % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // ==================== CHAT IA ====================
+
+        function openAIChat() {
+            document.getElementById('aiChat').classList.remove('hidden');
+            document.getElementById('chatInput').focus();
+        }
+
+        function closeAIChat() {
+            document.getElementById('aiChat').classList.add('hidden');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Message utilisateur
+            addChatMessage(message, 'user');
+            input.value = '';
+
+            // Simulation réponse IA (dans MVP, remplacer par appel API réel)
+            setTimeout(() => {
+                const responses = [
+                    "J'ai analysé vos habitudes de travail. Je vous suggère de bloquer 90 minutes demain matin pour votre projet prioritaire.",
+                    "Votre taux de complétion des tâches est en hausse de 15% cette semaine. Continuez ainsi !",
+                    "D'après vos données, votre productivité chute après 14h. Essayez une courte sieste ou une marche de 10 minutes.",
+                    "Je peux vous aider à prioriser vos 3 objectifs principaux pour demain. Voulez-vous que je les organise ?",
+                    "Excellent travail sur votre streak ! Vous êtes sur le point d'établir un nouveau record personnel."
+                ];
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                addChatMessage(randomResponse, 'ai');
+            }, 1000);
+        }
+
+        function addChatMessage(text, sender) {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'flex gap-3 slide-in';
+            
+            if (sender === 'user') {
+                div.innerHTML = `
+                    <div class="flex-1"></div>
+                    <div class="glass rounded-2xl rounded-tr-none p-3 max-w-[80%] bg-indigo-600/20 border-indigo-500/30">
+                        <p class="text-sm">${text}</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-slate-700 flex-shrink-0 flex items-center justify-center text-xs font-bold">Vous</div>
+                `;
+            } else {
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex-shrink-0 flex items-center justify-center text-xs font-bold">IA</div>
+                    <div class="glass rounded-2xl rounded-tl-none p-3 max-w-[80%]">
+                        <p class="text-sm">${text}</p>
+                    </div>
+                `;
+            }
+            
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // ==================== ADMIN PANEL ====================
+
+        function toggleAdminPanel() {
+            const panel = document.getElementById('adminPanel');
+            panel.classList.toggle('translate-x-full');
+            if (!panel.classList.contains('translate-x-full')) {
+                updateAdminStats();
+            }
+        }
+
+        function initAdminPanel() {
+            // Vérifier si on est bien l'admin
+            if (currentUser.email !== 'admin@mindflow.ai') {
+                alert('Accès refusé');
+                return;
+            }
+        }
+
+        function updateAdminStats() {
+            const userCount = DB.users.filter(u => u.role === 'user').length;
+            const today = new Date().toDateString();
+            const activeToday = DB.sessions.filter(s => new Date(s.loginAt).toDateString() === today).length;
+            const totalTasks = DB.tasks.length;
+            
+            // Calcul revenus potentiels (simulation)
+            const potentialRevenue = userCount * 9.99; // Si tous passent Pro
+
+            document.getElementById('adminUserCount').textContent = userCount;
+            document.getElementById('adminActiveToday').textContent = activeToday;
+            document.getElementById('adminTasksTotal').textContent = totalTasks;
+            document.getElementById('adminRevenue').textContent = `€${potentialRevenue.toFixed(0)}`;
+
+            // Update Data Monetization progress
+            const progress = Math.min((userCount / DB.settings.userThreshold) * 100, 100);
+            document.getElementById('dataProgress').style.width = `${progress}%`;
+            document.getElementById('dataProgressText').textContent = `${Math.round(progress)}% - ${userCount}/${DB.settings.userThreshold} utilisateurs`;
+            
+            const btn = document.getElementById('dataMonetizationBtn');
+            if (userCount >= DB.settings.userThreshold) {
+                btn.disabled = false;
+                btn.classList.remove('cursor-not-allowed', 'bg-slate-700', 'text-gray-400');
+                btn.classList.add('bg-yellow-600', 'text-white', 'hover:bg-yellow-700');
+                btn.textContent = DB.settings.dataMonetizationEnabled ? 'Désactiver' : 'Activer Data Monetization';
+            }
+        }
+
+        function changeAdminPassword() {
+            const current = document.getElementById('currentAdminPass').value;
+            const newPass = document.getElementById('newAdminPass').value;
+            const confirm = document.getElementById('confirmAdminPass').value;
+
+            if (current !== currentUser.password) {
+                alert('Mot de passe actuel incorrect');
+                return;
+            }
+
+            if (newPass !== confirm) {
+                alert('Les nouveaux mots de passe ne correspondent pas');
+                return;
+            }
+
+            if (newPass.length < 6) {
+                alert('Le mot de passe doit faire au moins 6 caractères');
+                return;
+            }
+
+            // Update password
+            const userIndex = DB.users.findIndex(u => u.id === currentUser.id);
+            DB.users[userIndex].password = newPass;
+            currentUser.password = newPass;
+            
+            saveDB();
+            logAdmin(`🔑 Mot de passe admin modifié par ${currentUser.email}`);
+            
+            alert('Mot de passe mis à jour avec succès');
+            document.getElementById('currentAdminPass').value = '';
+            document.getElementById('newAdminPass').value = '';
+            document.getElementById('confirmAdminPass').value = '';
+        }
+
+        function logAdmin(message) {
+            const logs = document.getElementById('adminLogs');
+            const time = new Date().toLocaleTimeString('fr-FR');
+            const line = document.createElement('div');
+            line.className = 'console-line text-gray-300';
+            line.innerHTML = `<span class="text-gray-500">[${time}]</span> ${message}`;
+            logs.appendChild(line);
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function executeAdminCommand() {
+            const input = document.getElementById('adminCommand');
+            const cmd = input.value.trim();
+            if (!cmd) return;
+
+            logAdmin(`> ${cmd}`);
+            
+            // Simulation commandes
+            if (cmd === 'help') {
+                logAdmin('Commandes disponibles: clear, stats, users, export, reset');
+            } else if (cmd === 'clear') {
+                document.getElementById('adminLogs').innerHTML = '';
+            } else if (cmd === 'stats') {
+                logAdmin(`Utilisateurs: ${DB.users.length}, Tâches: ${DB.tasks.length}`);
+            } else if (cmd === 'users') {
+                DB.users.forEach(u => logAdmin(`- ${u.email} (${u.role})`));
+            } else if (cmd === 'export') {
+                exportData();
+            } else if (cmd === 'reset') {
+                if(confirm('Réinitialiser toutes les données?')) {
+                    localStorage.clear();
+                    location.reload();
+                }
+            } else {
+                logAdmin(`Commande inconnue: ${cmd}`);
+            }
+            
+            input.value = '';
+        }
+
+        function toggleDataMonetization() {
+            if (DB.users.filter(u => u.role === 'user').length < DB.settings.userThreshold) {
+                alert('Seuil de 10k utilisateurs non atteint');
+                return;
+            }
+            
+            DB.settings.dataMonetizationEnabled = !DB.settings.dataMonetizationEnabled;
+            saveDB();
+            updateAdminStats();
+            logAdmin(`Data Monetization ${DB.settings.dataMonetizationEnabled ? 'ACTIVÉ' : 'DÉSACTIVÉ'}`);
+        }
+
+        function exportData() {
+            const data = {
+                users: DB.users.map(u => ({...u, password: '[HASHED]'})), // Mask passwords
+                tasks: DB.tasks,
+                sessions: DB.sessions,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `mindflow_export_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            
+            logAdmin('📥 Export données effectué');
+        }
+
+        // ==================== UTILITAIRES ====================
+
+        function generateWeeklyChart() {
+            const chart = document.getElementById('weeklyChart');
+            const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+            const values = [65, 78, 45, 89, 92, 34, 56]; // Données simulées
+            
+            chart.innerHTML = '';
+            values.forEach((val, i) => {
+                const bar = document.createElement('div');
+                bar.className = 'w-full bg-indigo-600/30 rounded-t hover:bg-indigo-500/50 transition cursor-pointer relative group';
+                bar.style.height = `${val}%`;
+                
+                // Tooltip
+                bar.innerHTML = `
+                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:block bg-slate-800 text-xs px-2 py-1 rounded whitespace-nowrap border border-white/10">
+                        ${val}% productivité
+                    </div>
+                `;
+                
+                chart.appendChild(bar);
+            });
+        }
+
+        function rotateAITips() {
+            const tips = [
+                "Votre pic de productivité est entre 9h et 11h. Réservez ce créneau pour vos tâches importantes.",
+                "La technique Pomodoro augmente votre focus de 40%. Essayez 25 min de travail, 5 min de pause.",
+                "Vous complétez 23% plus de tâches les jours où vous faites du sport le matin.",
+                "Désactivez les notifications pendant vos sessions de deep work.",
+                "Prenez 5 minutes pour planifier votre lendemain avant de dormir."
+            ];
+            
+            let i = 0;
+            setInterval(() => {
+                i = (i + 1) % tips.length;
+                const tipEl = document.getElementById('aiTip');
+                tipEl.style.opacity = 0;
+                setTimeout(() => {
+                    tipEl.textContent = `"${tips[i]}"`;
+                    tipEl.style.opacity = 1;
+                }, 300);
+            }, 10000);
+        }
+
+        function showUpgradeModal() {
+            alert('Redirection vers la page de paiement Pro... (Feature à implémenter)');
+        }
+
+        // Auto-login si session existante
+        window.onload = () => {
+            const saved = localStorage.getItem('mindflow_current_user');
+            if (saved) {
+                currentUser = JSON.parse(saved);
+                initApp();
+            }
+        };
+    </script>
+</body>
+</html>
