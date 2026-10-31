@@ -1,0 +1,457 @@
+{
+  "suite": "Suite Acad’",
+  "lanceur": {
+    "version": "1.1.0",
+    "date": "2026-10-28",
+    "notes": "La suite s'appelle désormais Suite Acad’ : les applications portent leur seul nom (Texte, Calcul, Diapo, PDF, FonctionGrist…). Nouveautés : application Dépannage (Excel et classeurs), « Ouvrir avec » vers Euro-Office, LibreOffice ou Microsoft Office, mise à jour qui attend la fermeture d'une application ouverte, thème sombre corrigé, affichage garanti sur tous les postes.",
+    "fichier": "SuiteAcad.exe",
+    "sha256": "bebe9ff44bfdb14577dc63c9af6d788a42c42391cdba6e610c964ea711c6791c",
+    "taille": 14248960
+  },
+  "applications": [
+    {
+      "id": "texte",
+      "nom": "Texte",
+      "slogan": "Rédaction et mise en forme de documents",
+      "inspire": "Word, Writer",
+      "categorie": "classique",
+      "ordre": 1,
+      "couleur": "#2456B0",
+      "lettre": "Tx",
+      "description": "Le traitement de texte de la suite : courriers, notes, comptes rendus et rapports, avec les styles, tableaux et images que l'on attend d'un outil bureautique. Ouvre et enregistre les documents Word (.docx).",
+      "fonctionnalites": [
+        "Ruban complet : police, paragraphe, styles, insertion, mise en page",
+        "Styles de titres et sommaire automatique",
+        "Tableaux, images, liens, sauts de page",
+        "En-tête et pied de page, numéros de page",
+        "Rechercher et remplacer, statistiques",
+        "Typographie française automatique (espaces insécables)",
+        "Modèles : courrier, compte rendu, note, rapport, attestation",
+        "Ouvre et enregistre Word (.docx) et OpenDocument (.odt)",
+        "Export PDF, HTML, texte et Markdown",
+        "Récupération automatique en cas de fermeture imprévue"
+      ],
+      "captures": [
+        "texte-01.png",
+        "texte-02.png"
+      ],
+      "formats": [
+        {
+          "ext": "docx",
+          "description": "Document Word"
+        },
+        {
+          "ext": "odt",
+          "description": "Document OpenDocument"
+        },
+        {
+          "ext": "txt",
+          "description": "Texte brut"
+        }
+      ],
+      "iconeRessource": 2,
+      "versions": [
+        {
+          "version": "1.1.0",
+          "date": "2026-10-28",
+          "notes": "Première version : ruban complet, styles de titres, tableaux, images, en-tête et pied de page, sommaire automatique, rechercher et remplacer, modèles de courrier et de compte rendu, import et export Word, OpenDocument, PDF, HTML et texte.",
+          "fichier": "applications/texte-1.1.0.zip",
+          "sha256": "948ee2c9bac53aa401c79c24d4a70b9a9e2890581e30668d77947df2fff6bf33",
+          "taille": 356658
+        }
+      ]
+    },
+    {
+      "id": "calcul",
+      "nom": "Calcul",
+      "slogan": "Tableurs et données",
+      "inspire": "Excel, Calc",
+      "categorie": "classique",
+      "ordre": 2,
+      "couleur": "#1E7444",
+      "lettre": "Ca",
+      "description": "Le tableur de la suite : formules en français comme dans Excel, mise en forme, tri et filtres, graphiques, plusieurs feuilles. Ouvre et enregistre les classeurs Excel (.xlsx), OpenDocument (.ods) et CSV.",
+      "fonctionnalites": [
+        "Plus de 120 fonctions en français (SOMME, SI, RECHERCHEV, NB.SI…)",
+        "Formats de nombres, dates, monétaires et pourcentages",
+        "Mise en forme des cellules, bordures, fusion",
+        "Mise en forme conditionnelle et validation des données",
+        "Tri, filtres automatiques, figer les volets",
+        "Poignée de recopie et séries automatiques",
+        "Graphiques : colonnes, barres, lignes, secteurs, nuage",
+        "Plusieurs feuilles, références entre feuilles",
+        "Ouvre et enregistre Excel (.xlsx), OpenDocument (.ods) et CSV",
+        "Modèles : budget, inventaire, suivi, notes de frais, planning"
+      ],
+      "captures": [
+        "calcul-01.png",
+        "calcul-02.png"
+      ],
+      "formats": [
+        {
+          "ext": "xlsx",
+          "description": "Classeur Excel"
+        },
+        {
+          "ext": "ods",
+          "description": "Classeur OpenDocument"
+        },
+        {
+          "ext": "csv",
+          "description": "Fichier CSV"
+        }
+      ],
+      "iconeRessource": 3,
+      "versions": [
+        {
+          "version": "1.1.0",
+          "date": "2026-10-28",
+          "notes": "Première version : plus de 120 fonctions en français, mise en forme des cellules et des nombres, fusion, figer les volets, tri, filtres, poignée de recopie, graphiques, rechercher et remplacer, import et export Excel, OpenDocument, CSV et PDF.",
+          "fichier": "applications/calcul-1.1.0.zip",
+          "sha256": "e39c8a804111f6768fb30bd964eca452e11561659ed18496a9a494cf66e9233e",
+          "taille": 554540
+        }
+      ]
+    },
+    {
+      "id": "diapo",
+      "nom": "Diapo",
+      "slogan": "Présentations et diaporamas",
+      "inspire": "PowerPoint, Impress",
+      "categorie": "classique",
+      "ordre": 3,
+      "couleur": "#B25000",
+      "lettre": "Di",
+      "description": "Pour préparer et projeter des présentations : dispositions, thèmes, formes, images, notes de l'orateur et mode diaporama plein écran. Exporte au format PowerPoint (.pptx) et PDF.",
+      "fonctionnalites": [
+        "Dispositions de diapositives et thèmes prêts à l'emploi",
+        "Zones de texte, formes, images et tableaux",
+        "Repères magnétiques, alignement et distribution",
+        "Transitions et animations d'apparition",
+        "Notes de l'orateur et mode présentateur avec chronomètre",
+        "Écran public sur un second affichage",
+        "Trieuse de diapositives par glisser-déposer",
+        "Ouvre et enregistre PowerPoint (.pptx)",
+        "Export PDF, images et documents à distribuer",
+        "Modèles : réunion de service, bilan de projet, formation"
+      ],
+      "captures": [
+        "diapo-01.png",
+        "diapo-02.png"
+      ],
+      "formats": [
+        {
+          "ext": "diapo",
+          "description": "Présentation Suite Acad’",
+          "parDefaut": true
+        },
+        {
+          "ext": "pptx",
+          "description": "Présentation PowerPoint"
+        }
+      ],
+      "iconeRessource": 4,
+      "versions": [
+        {
+          "version": "1.1.0",
+          "date": "2026-10-28",
+          "notes": "Première version : dispositions, thèmes, zones de texte, formes, images, tableaux, notes, transitions, mode présentateur, import et export PowerPoint, export PDF.",
+          "fichier": "applications/diapo-1.1.0.zip",
+          "sha256": "b2404f73e4baabf34df2423e6196305f67f5c742bed03d5b4b0d32e2ca982336",
+          "taille": 398118
+        }
+      ]
+    },
+    {
+      "id": "pdf",
+      "nom": "PDF",
+      "slogan": "Lecture, organisation et protection de PDF",
+      "inspire": "Acrobat",
+      "categorie": "classique",
+      "ordre": 4,
+      "couleur": "#B0261E",
+      "lettre": "PDF",
+      "description": "Lire, annoter, réorganiser, fusionner, découper, signer et protéger des PDF, sans envoyer vos documents sur internet.",
+      "fonctionnalites": [
+        "Lecture rapide avec miniatures et recherche dans le texte",
+        "Annotations : texte, surligneur, crayon, formes, flèches",
+        "Signature dessinée ou importée, mémorisée sur le poste",
+        "Tampons : approuvé, refusé, confidentiel, copie conforme…",
+        "Réorganiser, pivoter, dupliquer et supprimer des pages",
+        "Combiner plusieurs PDF et images, extraire, fractionner",
+        "Remplir les formulaires PDF",
+        "Filigrane et numérotation des pages",
+        "Caviardage définitif des informations sensibles",
+        "Protection par mot de passe et ouverture des PDF protégés"
+      ],
+      "captures": [
+        "pdf-01.png",
+        "pdf-02.png"
+      ],
+      "formats": [
+        {
+          "ext": "pdf",
+          "description": "Document PDF"
+        }
+      ],
+      "iconeRessource": 5,
+      "versions": [
+        {
+          "version": "1.1.0",
+          "date": "2026-10-28",
+          "notes": "Première version : lecture, recherche, miniatures, réorganisation, rotation, suppression et extraction de pages, fusion, découpe, annotations, signature, filigrane, numérotation, conversion d'images en PDF, protection par mot de passe.",
+          "fichier": "applications/pdf-1.1.0.zip",
+          "sha256": "3e3b4786a36e4f3e38ca83134e3db0f1ab91fa16452cc1947b14357fc0356236",
+          "taille": 996872
+        }
+      ]
+    },
+    {
+      "id": "formulaires",
+      "nom": "FonctionGrist",
+      "slogan": "Tables de données et formulaires simples",
+      "inspire": "Grist, Forms",
+      "categorie": "nouvelle",
+      "ordre": 5,
+      "couleur": "#0E7380",
+      "lettre": "FG",
+      "description": "Créez une base de données en quelques clics : des tables avec des colonnes typées, des fiches, des formulaires à partager pour collecter des réponses et des synthèses. Sans formules compliquées ni serveur.",
+      "fonctionnalites": [
+        "Tables de données avec colonnes typées",
+        "Choix en couleurs, cases à cocher, notes, liens entre tables",
+        "Calculs simples en français, y compris à travers les liens",
+        "Vues grille, fiche et synthèse automatique",
+        "Tri, filtres et recherche instantanée",
+        "Coller directement depuis Excel",
+        "Concepteur de formulaires avec aperçu en direct",
+        "Publication en page web ou dans un dossier partagé",
+        "Collecte automatique des réponses, sans doublon",
+        "Import et export Excel et CSV"
+      ],
+      "captures": [
+        "formulaires-01.png",
+        "formulaires-02.png",
+        "formulaires-03.png"
+      ],
+      "formats": [
+        {
+          "ext": "formulaire",
+          "description": "Base FonctionGrist",
+          "parDefaut": true
+        },
+        {
+          "ext": "reponse",
+          "description": "Réponse à un formulaire Suite Acad’",
+          "parDefaut": true
+        }
+      ],
+      "iconeRessource": 6,
+      "versions": [
+        {
+          "version": "1.1.0",
+          "date": "2026-10-28",
+          "notes": "Première version : tables et colonnes typées (texte, nombre, date, choix, case à cocher, e-mail, référence…), vues grille et fiche, concepteur de formulaires, collecte des réponses dans un dossier partagé, synthèses, import et export Excel et CSV.",
+          "fichier": "applications/formulaires-1.1.0.zip",
+          "sha256": "744f645878494d3c41d6737f60e57c2fbfc22ec7dba459d6d9b7184b54dda24a",
+          "taille": 499772
+        }
+      ]
+    },
+    {
+      "id": "publipostage",
+      "nom": "Publipostage",
+      "slogan": "Messages personnalisés avec leurs pièces jointes",
+      "inspire": "Publipostage, Mail Merge",
+      "categorie": "bientot",
+      "ordre": 6,
+      "couleur": "#6B4E9B",
+      "lettre": "PJ",
+      "description": "",
+      "fonctionnalites": [],
+      "captures": [],
+      "formats": null,
+      "iconeRessource": 8,
+      "versions": []
+    },
+    {
+      "id": "depannage",
+      "nom": "Dépannage",
+      "slogan": "Débloquer et réparer Excel et les classeurs",
+      "inspire": "",
+      "categorie": "outil",
+      "ordre": 20,
+      "couleur": "#5B6B2E",
+      "lettre": "Dp",
+      "description": "Remet en état les classeurs qui ne s'ouvrent plus, refusent le copier-coller ou se disent « déjà utilisés », et corrige les dysfonctionnements d'Excel sur le poste : presse-papiers bloqué, Excel invisibles, compléments défaillants. Une sauvegarde est faite avant chaque correction, annulable à tout moment.",
+      "fonctionnalites": [
+        "Débloque les fichiers venus d'Internet ou d'un courriel",
+        "Supprime les verrous « déjà utilisé par un autre utilisateur »",
+        "Nettoie les styles et formats qui empêchent de coller",
+        "Supprime les noms en erreur (#REF!)",
+        "Lève les protections de feuille et de classeur",
+        "Répare les classeurs endommagés avec Excel",
+        "Convertit les anciens .xls",
+        "Rompt les liaisons vers d'autres classeurs",
+        "Libère le presse-papiers et ferme les Excel invisibles",
+        "Historique des corrections, annulables"
+      ],
+      "captures": [],
+      "formats": [],
+      "iconeRessource": 7,
+      "versions": [
+        {
+          "version": "1.1.0",
+          "date": "2026-10-28",
+          "notes": "Première version : analyse des classeurs (fichiers bloqués, verrous, protections, styles et formats accumulés, noms en erreur, liaisons, classeurs endommagés), correction automatique sans risque, réparation et conversion avec Excel, diagnostic du poste (presse-papiers, Excel invisibles ou figés, session à distance, compléments, accélération graphique, menus, fichiers de démarrage), historique annulable.",
+          "fichier": "applications/depannage-1.1.0.zip",
+          "sha256": "5ecb11817a7edfb3f782de5732315a91826bcbb92b858177c4dacf133d55924c",
+          "taille": 186970
+        }
+      ]
+    },
+    {
+      "id": "photo",
+      "nom": "Photo",
+      "slogan": "Retouche d'images",
+      "inspire": "Photoshop, GIMP",
+      "categorie": "bientot",
+      "ordre": 10,
+      "couleur": "#3E5BA9",
+      "lettre": "Ph",
+      "description": "",
+      "fonctionnalites": [],
+      "captures": [],
+      "formats": null,
+      "iconeRessource": 0,
+      "versions": []
+    },
+    {
+      "id": "vecteur",
+      "nom": "Vecteur",
+      "slogan": "Illustration vectorielle",
+      "inspire": "Illustrator, Inkscape",
+      "categorie": "bientot",
+      "ordre": 11,
+      "couleur": "#9A5B00",
+      "lettre": "Ve",
+      "description": "",
+      "fonctionnalites": [],
+      "captures": [],
+      "formats": null,
+      "iconeRessource": 0,
+      "versions": []
+    },
+    {
+      "id": "miseenpage",
+      "nom": "Design",
+      "slogan": "Mise en page et édition (PAO)",
+      "inspire": "InDesign, Scribus",
+      "categorie": "bientot",
+      "ordre": 12,
+      "couleur": "#8C2F5A",
+      "lettre": "inD",
+      "description": "",
+      "fonctionnalites": [],
+      "captures": [],
+      "formats": null,
+      "iconeRessource": 9,
+      "versions": []
+    },
+    {
+      "id": "prototype",
+      "nom": "Prototype",
+      "slogan": "Design d'interfaces et prototypage",
+      "inspire": "Figma, Penpot",
+      "categorie": "bientot",
+      "ordre": 13,
+      "couleur": "#4B5D8A",
+      "lettre": "Ui",
+      "description": "",
+      "fonctionnalites": [],
+      "captures": [],
+      "formats": null,
+      "iconeRessource": 0,
+      "versions": []
+    },
+    {
+      "id": "phototheque",
+      "nom": "Photothèque",
+      "slogan": "Photothèque et développement RAW",
+      "inspire": "Lightroom, darktable",
+      "categorie": "bientot",
+      "ordre": 14,
+      "couleur": "#2E6E8E",
+      "lettre": "Pt",
+      "description": "",
+      "fonctionnalites": [],
+      "captures": [],
+      "formats": null,
+      "iconeRessource": 0,
+      "versions": []
+    },
+    {
+      "id": "video",
+      "nom": "Vidéo",
+      "slogan": "Montage vidéo, étalonnage et son",
+      "inspire": "Premiere, Kdenlive",
+      "categorie": "bientot",
+      "ordre": 15,
+      "couleur": "#7A3B2E",
+      "lettre": "Vi",
+      "description": "",
+      "fonctionnalites": [],
+      "captures": [],
+      "formats": null,
+      "iconeRessource": 0,
+      "versions": []
+    },
+    {
+      "id": "animation",
+      "nom": "Animation",
+      "slogan": "Motion design et effets visuels",
+      "inspire": "After Effects",
+      "categorie": "bientot",
+      "ordre": 16,
+      "couleur": "#46418C",
+      "lettre": "An",
+      "description": "",
+      "fonctionnalites": [],
+      "captures": [],
+      "formats": null,
+      "iconeRessource": 0,
+      "versions": []
+    },
+    {
+      "id": "son",
+      "nom": "Son",
+      "slogan": "Enregistrement, édition et mixage audio",
+      "inspire": "Pro Tools, Audacity",
+      "categorie": "bientot",
+      "ordre": 17,
+      "couleur": "#2F6B4F",
+      "lettre": "So",
+      "description": "",
+      "fonctionnalites": [],
+      "captures": [],
+      "formats": null,
+      "iconeRessource": 0,
+      "versions": []
+    },
+    {
+      "id": "plan",
+      "nom": "Plan",
+      "slogan": "Conception et dessin assistés par ordinateur",
+      "inspire": "AutoCAD, LibreCAD",
+      "categorie": "bientot",
+      "ordre": 18,
+      "couleur": "#4B5563",
+      "lettre": "Pl",
+      "description": "",
+      "fonctionnalites": [],
+      "captures": [],
+      "formats": null,
+      "iconeRessource": 0,
+      "versions": []
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+.corps-app{flex:1;display:flex;min-height:0}
+.navigation{width:232px;flex:none;background:var(--surface-2);border-right:1px solid var(--ligne);overflow:auto;padding:12px 8px 30px;display:flex;flex-direction:column;gap:2px}
+.navigation h3{font-size:12px;font-weight:700;color:var(--encre-3);margin:14px 10px 6px;letter-spacing:.02em}
+.navigation h3:first-child{margin-top:2px}
+.element-nav{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--rayon);cursor:pointer;border:0;background:transparent;color:var(--encre);font:inherit;text-align:left;width:100%}
+.element-nav:hover{background:var(--survol)}
+.element-nav.actif{background:var(--accent-doux);color:var(--accent-texte);font-weight:600}
+.element-nav .emoji{width:22px;text-align:center;font-size:16px}
+.element-nav .nom{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.element-nav .compte{font-size:12px;color:var(--encre-3);font-weight:400}
+.ajout-nav{color:var(--encre-2)}
+.ajout-nav svg{width:16px;height:16px}
+.zone{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--papier);position:relative}
+
+/* Barre d'outils de la vue */
+.outils-vue{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--ligne);background:var(--surface);flex-wrap:wrap}
+.outils-vue h2{margin:0 8px 0 0;font-size:18px;display:flex;align-items:center;gap:8px}
+.outils-vue .recherche{position:relative;margin-left:auto}
+.outils-vue .recherche input{width:220px;padding:6px 10px 6px 30px;border:1px solid var(--ligne-forte);border-radius:var(--rayon);background:var(--papier);color:var(--encre)}
+.outils-vue .recherche svg{position:absolute;left:8px;top:8px;width:15px;height:15px;color:var(--encre-3)}
+.pastille-filtre{display:inline-flex;align-items:center;gap:6px;background:var(--accent-doux);color:var(--accent-texte);border-radius:20px;padding:3px 6px 3px 10px;font-size:13px}
+.pastille-filtre button{border:0;background:transparent;cursor:pointer;color:inherit;padding:0 2px;display:grid;place-items:center}
+
+/* Grille */
+.conteneur-grille{flex:1;overflow:auto;position:relative;outline:none}
+table.grille{border-collapse:separate;border-spacing:0;font-size:14px;background:var(--surface);min-width:100%}
+.grille th,.grille td{border-right:1px solid var(--ligne);border-bottom:1px solid var(--ligne);height:34px;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0}
+.grille thead th{position:sticky;top:0;z-index:3;background:var(--surface-2);font-weight:600;text-align:left;color:var(--encre);user-select:none;cursor:pointer}
+.grille thead th .tete{display:flex;align-items:center;gap:6px;min-width:0}
+.grille thead th .tete svg{width:14px;height:14px;color:var(--encre-3);flex:none}
+.grille thead th .tete .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.grille thead th .tri{color:var(--accent-texte)}
+.grille thead th:hover{background:var(--survol)}
+.grille thead th .poignee-l{position:absolute;right:-3px;top:0;bottom:0;width:7px;cursor:col-resize;z-index:2}
+.grille th.num,.grille td.num{width:52px;max-width:52px;min-width:52px;text-align:right;color:var(--encre-3);font-size:12px;position:sticky;left:0;z-index:2;background:var(--surface-2);cursor:pointer}
+.grille thead th.num{z-index:4}
+.grille td.num input{margin:0 4px 0 0;vertical-align:middle;accent-color:var(--accent)}
+.grille tr.choisie td{background:var(--accent-doux)}
+.grille tr.choisie td.num{background:var(--accent-doux)}
+.grille th.ajout-col{width:44px;max-width:44px;min-width:44px;text-align:center;color:var(--encre-2)}
+.grille td.c{cursor:cell;position:relative}
+.grille td.c.sel{outline:2px solid var(--accent);outline-offset:-2px;z-index:1}
+.grille td.c.calcul{background:var(--surface-2);color:var(--encre-2)}
+.grille td.c.nombre,.grille td.c.monetaire,.grille td.c.calcul.num-val{text-align:right;font-variant-numeric:tabular-nums}
+.grille td.c.erreur-val{color:var(--danger)}
+.grille td.c.case{text-align:center}
+.grille td.c.case input{accent-color:var(--accent);width:16px;height:16px;cursor:pointer;margin:0;vertical-align:middle}
+.grille tr.nouvelle td{color:var(--encre-3);cursor:pointer;background:var(--surface)}
+.grille tr.nouvelle td.c:hover{background:var(--survol)}
+.puce{display:inline-block;padding:1px 9px;border-radius:12px;font-size:13px;line-height:20px;margin-right:4px;color:#1D2935;max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+.lien-ref{color:var(--accent-texte)}
+.etoiles-c{color:#E0A400;letter-spacing:1px}
+.etoiles-c .vide{color:#C5CCD6}
+.grille td.c a{color:var(--accent-texte)}
+.editeur{position:absolute;z-index:20;box-shadow:0 4px 16px rgba(0,0,0,.18);border:2px solid var(--accent);background:var(--surface);color:var(--encre);font:14px var(--police);padding:5px 8px;outline:none;border-radius:2px}
+textarea.editeur{resize:both;min-height:110px;line-height:1.4}
+select.editeur{padding:4px}
+.vide-table{padding:50px;text-align:center;color:var(--encre-2)}
+
+/* Fiche */
+.fiche{flex:1;overflow:auto;padding:24px}
+.carte-fiche{max-width:760px;margin:0 auto;background:var(--surface);border-radius:10px;box-shadow:var(--ombre);padding:26px 30px}
+.carte-fiche .champ{margin-bottom:16px}
+.carte-fiche .champ>span:first-child{display:flex;gap:6px;align-items:center;font-weight:600;margin-bottom:4px;color:var(--encre)}
+.carte-fiche .champ svg{width:14px;height:14px;color:var(--encre-3)}
+.carte-fiche input[type=text],.carte-fiche input[type=date],.carte-fiche input[type=email],.carte-fiche input[type=tel],.carte-fiche input[type=url],.carte-fiche select,.carte-fiche textarea{width:100%;padding:8px 10px;border:1px solid var(--ligne-forte);border-radius:var(--rayon);background:var(--papier);color:var(--encre);font:inherit}
+.carte-fiche textarea{min-height:90px;resize:vertical}
+.carte-fiche .valeur-calcul{padding:8px 10px;background:var(--surface-2);border-radius:var(--rayon);color:var(--encre-2)}
+.carte-fiche .options-fiche{display:flex;flex-wrap:wrap;gap:6px 16px}
+.carte-fiche .options-fiche label{display:flex;gap:6px;align-items:center}
+.carte-fiche .etoiles-f button{font-size:24px;background:none;border:0;cursor:pointer;color:#C5CCD6;padding:0 2px}
+.carte-fiche .etoiles-f button.on{color:#E0A400}
+.nav-fiche{display:flex;align-items:center;gap:8px;max-width:760px;margin:0 auto 14px}
+.nav-fiche .pos{margin:0 8px;color:var(--encre-2)}
+.invalide{border-color:var(--danger)!important}
+
+/* Synthèse */
+.synthese{flex:1;overflow:auto;padding:22px}
+.grille-synthese{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;max-width:1300px;margin:0 auto}
+.carte-s{background:var(--surface);border-radius:10px;box-shadow:var(--ombre);padding:18px 20px;break-inside:avoid}
+.carte-s h4{margin:0 0 4px;font-size:15px;display:flex;align-items:center;gap:6px}
+.carte-s h4 svg{width:15px;height:15px;color:var(--encre-3)}
+.carte-s .sous{color:var(--encre-3);font-size:12px;margin-bottom:12px}
+.barre-s{display:grid;grid-template-columns:minmax(90px,38%) 1fr 64px;gap:8px;align-items:center;font-size:13px;margin:5px 0}
+.barre-s .lib{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.barre-s .jauge{height:14px;background:var(--surface-2);border-radius:7px;overflow:hidden}
+.barre-s .jauge i{display:block;height:100%;background:var(--accent);border-radius:7px}
+.barre-s .val{text-align:right;font-variant-numeric:tabular-nums;color:var(--encre-2)}
+.chiffres{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chiffres div{background:var(--surface-2);border-radius:8px;padding:10px 12px}
+.chiffres b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.chiffres span{font-size:12px;color:var(--encre-2)}
+.carte-s ul{margin:0;padding-left:18px;font-size:13px;color:var(--encre-2)}
+.total-s{max-width:1300px;margin:0 auto 14px;font-size:15px;color:var(--encre-2)}
+.total-s b{font-size:26px;color:var(--encre);margin-right:6px}
+
+/* Concepteur de formulaires */
+.concepteur{flex:1;display:grid;grid-template-columns:minmax(360px,440px) 1fr;min-height:0}
+.reglages-f{overflow:auto;padding:18px 20px;border-right:1px solid var(--ligne);background:var(--surface)}
+.reglages-f .champ{margin-bottom:12px}
+.reglages-f h4{margin:18px 0 8px;font-size:14px}
+.liste-champs{display:flex;flex-direction:column;gap:6px}
+.ligne-champ{border:1px solid var(--ligne);border-radius:var(--rayon);padding:8px 10px;background:var(--papier)}
+.ligne-champ.inactif{opacity:.6}
+.ligne-champ .haut{display:flex;align-items:center;gap:8px}
+.ligne-champ .haut .nom{flex:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ligne-champ .haut svg{width:14px;height:14px;color:var(--encre-3)}
+.ligne-champ .detail{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.ligne-champ .detail input{width:100%;padding:5px 8px;border:1px solid var(--ligne);border-radius:var(--rayon-s);background:var(--surface);color:var(--encre);font-size:13px}
+.ligne-champ button.mini{border:0;background:transparent;cursor:pointer;color:var(--encre-2);padding:2px;border-radius:3px;display:grid;place-items:center}
+.ligne-champ button.mini:hover{background:var(--survol)}
+.apercu-f{position:relative;background:#EEF3F4;min-width:0}
+.apercu-f iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.info-collecte{background:var(--accent-doux);border-radius:var(--rayon);padding:10px 12px;font-size:13px;margin-top:8px;color:var(--accent-texte);word-break:break-all}
+
+/* Saisie seule (fichier publié) */
+.saisie{position:fixed;inset:0;z-index:50;background:#EEF3F4}
+.saisie iframe{width:100%;height:100%;border:0}
+
+/* Éditeur de choix */
+.editeur-choix{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto;padding:2px}
+.editeur-choix .ligne-c{display:flex;gap:6px;align-items:center}
+.editeur-choix .ligne-c input[type=text]{flex:1}
+.editeur-choix .ligne-c input[type=color]{width:34px;height:30px;padding:1px;border:1px solid var(--ligne);border-radius:4px}
+.aide-formule{font-size:12px;color:var(--encre-2);background:var(--surface-2);border-radius:6px;padding:8px 10px;margin-top:6px;line-height:1.6}
+.aide-formule code{background:var(--surface);padding:0 4px;border-radius:3px;cursor:pointer}
+@media print{.appli>*:not(.corps-app),.navigation,.outils-vue{display:none!important}.synthese{overflow:visible}.appli,.corps-app,.zone{display:block;height:auto}}

@@ -1,0 +1,32 @@
+{
+  "id": "pdf",
+  "nom": "PDF",
+  "slogan": "Lecture, organisation et protection de PDF",
+  "inspire": "Acrobat",
+  "categorie": "classique",
+  "ordre": 4,
+  "couleur": "#B0261E",
+  "lettre": "PDF",
+  "iconeRessource": 5,
+  "description": "Lire, annoter, réorganiser, fusionner, découper, signer et protéger des PDF, sans envoyer vos documents sur internet.",
+  "formats": [
+    {
+      "ext": "pdf",
+      "description": "Document PDF"
+    }
+  ],
+  "fonctionnalites": [
+    "Lecture rapide avec miniatures et recherche dans le texte",
+    "Annotations : texte, surligneur, crayon, formes, flèches",
+    "Signature dessinée ou importée, mémorisée sur le poste",
+    "Tampons : approuvé, refusé, confidentiel, copie conforme…",
+    "Réorganiser, pivoter, dupliquer et supprimer des pages",
+    "Combiner plusieurs PDF et images, extraire, fractionner",
+    "Remplir les formulaires PDF",
+    "Filigrane et numérotation des pages",
+    "Caviardage définitif des informations sensibles",
+    "Protection par mot de passe et ouverture des PDF protégés"
+  ],
+  "captures": [],
+  "versions": []
+}

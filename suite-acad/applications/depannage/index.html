@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dépannage</title>
+<link rel="stylesheet" href="commun/atelier.css">
+<link rel="stylesheet" href="depannage.css">
+</head>
+<body data-app="depannage">
+<div class="appli">
+  <div class="barre-titre" id="barre-titre"></div>
+  <main class="depannage" id="zone">
+    <section class="bandeau-auto" aria-labelledby="titre-auto">
+      <div class="texte-auto">
+        <h1 id="titre-auto">Réparer Excel et les classeurs qui posent problème</h1>
+        <p>Ajoutez les classeurs concernés puis lancez la correction automatique : fichiers bloqués, verrous, styles accumulés qui empêchent de coller, Excel invisibles et presse-papiers bloqué. Chaque fichier est sauvegardé avant d'être modifié.</p>
+      </div>
+      <button class="btn primaire grand" id="tout-corriger"></button>
+    </section>
+    <div class="resultat-auto masque" id="resultat-auto" role="status"></div>
+    <div class="colonnes">
+      <section class="panneau" aria-labelledby="titre-classeurs">
+        <header class="tete-panneau">
+          <h2 id="titre-classeurs">Classeurs</h2>
+          <div class="outils-panneau">
+            <button class="btn" id="ajouter-fichiers"></button>
+            <button class="btn" id="ajouter-dossier"></button>
+            <button class="btn discret icone masque" id="vider" aria-label="Retirer tous les classeurs de la liste" title="Retirer tous les classeurs de la liste"></button>
+          </div>
+        </header>
+        <div id="liste-fichiers" class="liste-fichiers"></div>
+      </section>
+      <section class="panneau" aria-labelledby="titre-poste">
+        <header class="tete-panneau">
+          <h2 id="titre-poste">Excel sur ce poste</h2>
+          <div class="outils-panneau"><button class="btn discret icone" id="reanalyser-poste" aria-label="Vérifier de nouveau" title="Vérifier de nouveau"></button></div>
+        </header>
+        <div id="liste-poste" class="liste-poste"></div>
+      </section>
+    </div>
+    <section class="panneau historique" aria-labelledby="titre-historique">
+      <header class="tete-panneau">
+        <h2 id="titre-historique">Historique des corrections</h2>
+        <div class="outils-panneau"><button class="btn discret" id="ouvrir-sauvegardes"></button></div>
+      </header>
+      <div id="liste-historique"></div>
+    </section>
+  </main>
+</div>
+<script type="module" src="depannage.js"></script>
+</body>
+</html>

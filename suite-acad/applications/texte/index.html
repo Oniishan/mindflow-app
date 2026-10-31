@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Texte</title>
+<link rel="stylesheet" href="commun/atelier.css">
+<link rel="stylesheet" href="texte.css">
+<style id="style-doc"></style>
+<style id="style-impression" media="print"></style>
+<style id="pagination" media="screen"></style>
+</head>
+<body data-app="texte">
+<div class="appli">
+  <div class="barre-titre" id="barre-titre"></div>
+  <div id="zone-ruban"></div>
+  <div class="regle" id="regle" aria-hidden="true"><div class="regle-int" id="regle-int"></div></div>
+  <div class="corps-app">
+    <aside class="panneau-nav masque" id="panneau-nav" aria-label="Navigation"><header><span>Navigation</span><button class="btn discret icone" data-fermer-panneau="panneau-nav" aria-label="Fermer"></button></header><div class="liste-nav" id="liste-nav"></div></aside>
+    <div class="espace-travail" id="espace">
+      <div class="echelle" id="echelle">
+        <div class="pages" id="pages">
+          <div class="fonds-pages" id="fonds-pages"></div>
+          <div class="feuille" id="feuille" contenteditable="true" spellcheck="true" lang="fr" role="textbox" aria-multiline="true" aria-label="Contenu du document"></div>
+          <div class="calque-hf" id="calque-hf"></div>
+        </div>
+      </div>
+    </div>
+    <aside class="panneau-lat masque" id="panneau-rech" aria-label="Rechercher et remplacer"></aside>
+    <aside class="panneau-lat masque" id="panneau-com" aria-label="Commentaires"></aside>
+  </div>
+  <div class="barre-etat" id="barre-etat"></div>
+</div>
+<div class="filigrane-impression" id="filigrane-impression" aria-hidden="true"></div>
+<div class="poignees-image masque" id="poignees-image"><span data-p="se"></span><span data-p="sw"></span><span data-p="ne"></span><span data-p="nw"></span></div>
+<script src="commun/vendor/mammoth.min.js"></script>
+<script type="module" src="texte.js"></script>
+</body>
+</html>

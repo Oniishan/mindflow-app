@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PDF</title>
+<link rel="stylesheet" href="commun/atelier.css">
+<link rel="stylesheet" href="pdf.css">
+<style id="style-impression" media="print"></style>
+</head>
+<body data-app="pdf">
+<div class="appli" id="appli">
+  <div class="barre-titre" id="barre-titre"></div>
+  <div id="zone-ruban"></div>
+  <div class="corps-app">
+    <aside class="panneau-miniatures" id="miniatures" aria-label="Pages" tabindex="0"></aside>
+    <main class="zone-lecture">
+      <div class="visionneuse" id="visionneuse" tabindex="-1"><div class="pages" id="pages"></div></div>
+      <div class="vide-pdf masque" id="vide">
+        <div class="carte-vide">
+          <h2>Aucun document ouvert</h2>
+          <p>Glissez un PDF ou des images ici, ou choisissez une action.</p>
+          <div class="actions-vide">
+            <button class="btn primaire" data-a="ouvrir">Ouvrir un PDF</button>
+            <button class="btn" data-a="combiner">Combiner des PDF</button>
+            <button class="btn" data-a="images">Convertir des images en PDF</button>
+          </div>
+        </div>
+      </div>
+      <div class="barre-recherche masque" id="barre-recherche" role="search">
+        <input type="search" id="q" placeholder="Rechercher dans le document" aria-label="Rechercher dans le document">
+        <span id="q-res"></span>
+        <button class="btn discret icone" id="q-prec" title="Précédent (Maj+Entrée)" aria-label="Précédent"></button>
+        <button class="btn discret icone" id="q-suiv" title="Suivant (Entrée)" aria-label="Suivant"></button>
+        <button class="btn discret icone" id="q-fermer" title="Fermer (Échap)" aria-label="Fermer"></button>
+      </div>
+    </main>
+  </div>
+  <div class="barre-etat" id="barre-etat"></div>
+</div>
+<div class="organiseur masque" id="organiseur"><div class="barre-org" id="barre-org"></div><div class="grille-org" id="grille-org"></div></div>
+<div class="zone-depot masque" id="zone-depot"><div>Déposez vos fichiers pour les ajouter</div></div>
+<div class="zone-impression" id="zone-impression"></div>
+<script src="commun/vendor/pdf-lib.min.js"></script>
+<script type="module" src="pdf-app.js"></script>
+</body>
+</html>

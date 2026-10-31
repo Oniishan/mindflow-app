@@ -1,0 +1,27 @@
+{
+  "id": "depannage",
+  "nom": "Dépannage",
+  "slogan": "Débloquer et réparer Excel et les classeurs",
+  "inspire": "",
+  "categorie": "outil",
+  "ordre": 20,
+  "couleur": "#5B6B2E",
+  "lettre": "Dp",
+  "iconeRessource": 7,
+  "description": "Remet en état les classeurs qui ne s'ouvrent plus, refusent le copier-coller ou se disent « déjà utilisés », et corrige les dysfonctionnements d'Excel sur le poste : presse-papiers bloqué, Excel invisibles, compléments défaillants. Une sauvegarde est faite avant chaque correction, annulable à tout moment.",
+  "formats": [],
+  "fonctionnalites": [
+    "Débloque les fichiers venus d'Internet ou d'un courriel",
+    "Supprime les verrous « déjà utilisé par un autre utilisateur »",
+    "Nettoie les styles et formats qui empêchent de coller",
+    "Supprime les noms en erreur (#REF!)",
+    "Lève les protections de feuille et de classeur",
+    "Répare les classeurs endommagés avec Excel",
+    "Convertit les anciens .xls",
+    "Rompt les liaisons vers d'autres classeurs",
+    "Libère le presse-papiers et ferme les Excel invisibles",
+    "Historique des corrections, annulables"
+  ],
+  "captures": [],
+  "versions": []
+}

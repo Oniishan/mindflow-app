@@ -1,0 +1,40 @@
+{
+  "id": "texte",
+  "nom": "Texte",
+  "slogan": "Rédaction et mise en forme de documents",
+  "inspire": "Word, Writer",
+  "categorie": "classique",
+  "ordre": 1,
+  "couleur": "#2456B0",
+  "lettre": "Tx",
+  "iconeRessource": 2,
+  "description": "Le traitement de texte de la suite : courriers, notes, comptes rendus et rapports, avec les styles, tableaux et images que l'on attend d'un outil bureautique. Ouvre et enregistre les documents Word (.docx).",
+  "formats": [
+    {
+      "ext": "docx",
+      "description": "Document Word"
+    },
+    {
+      "ext": "odt",
+      "description": "Document OpenDocument"
+    },
+    {
+      "ext": "txt",
+      "description": "Texte brut"
+    }
+  ],
+  "fonctionnalites": [
+    "Ruban complet : police, paragraphe, styles, insertion, mise en page",
+    "Styles de titres et sommaire automatique",
+    "Tableaux, images, liens, sauts de page",
+    "En-tête et pied de page, numéros de page",
+    "Rechercher et remplacer, statistiques",
+    "Typographie française automatique (espaces insécables)",
+    "Modèles : courrier, compte rendu, note, rapport, attestation",
+    "Ouvre et enregistre Word (.docx) et OpenDocument (.odt)",
+    "Export PDF, HTML, texte et Markdown",
+    "Récupération automatique en cas de fermeture imprévue"
+  ],
+  "captures": [],
+  "versions": []
+}

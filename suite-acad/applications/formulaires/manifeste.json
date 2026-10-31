@@ -1,0 +1,38 @@
+{
+  "id": "formulaires",
+  "nom": "FonctionGrist",
+  "slogan": "Tables de données et formulaires simples",
+  "inspire": "Grist, Forms",
+  "categorie": "nouvelle",
+  "ordre": 5,
+  "couleur": "#0E7380",
+  "lettre": "FG",
+  "iconeRessource": 6,
+  "description": "Créez une base de données en quelques clics : des tables avec des colonnes typées, des fiches, des formulaires à partager pour collecter des réponses et des synthèses. Sans formules compliquées ni serveur.",
+  "formats": [
+    {
+      "ext": "formulaire",
+      "description": "Base FonctionGrist",
+      "parDefaut": true
+    },
+    {
+      "ext": "reponse",
+      "description": "Réponse à un formulaire Suite Acad’",
+      "parDefaut": true
+    }
+  ],
+  "fonctionnalites": [
+    "Tables de données avec colonnes typées",
+    "Choix en couleurs, cases à cocher, notes, liens entre tables",
+    "Calculs simples en français, y compris à travers les liens",
+    "Vues grille, fiche et synthèse automatique",
+    "Tri, filtres et recherche instantanée",
+    "Coller directement depuis Excel",
+    "Concepteur de formulaires avec aperçu en direct",
+    "Publication en page web ou dans un dossier partagé",
+    "Collecte automatique des réponses, sans doublon",
+    "Import et export Excel et CSV"
+  ],
+  "captures": [],
+  "versions": []
+}

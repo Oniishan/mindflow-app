@@ -1,0 +1,37 @@
+{
+  "id": "diapo",
+  "nom": "Diapo",
+  "slogan": "Présentations et diaporamas",
+  "inspire": "PowerPoint, Impress",
+  "categorie": "classique",
+  "ordre": 3,
+  "couleur": "#B25000",
+  "lettre": "Di",
+  "iconeRessource": 4,
+  "description": "Pour préparer et projeter des présentations : dispositions, thèmes, formes, images, notes de l'orateur et mode diaporama plein écran. Exporte au format PowerPoint (.pptx) et PDF.",
+  "formats": [
+    {
+      "ext": "diapo",
+      "description": "Présentation Suite Acad’",
+      "parDefaut": true
+    },
+    {
+      "ext": "pptx",
+      "description": "Présentation PowerPoint"
+    }
+  ],
+  "fonctionnalites": [
+    "Dispositions de diapositives et thèmes prêts à l'emploi",
+    "Zones de texte, formes, images et tableaux",
+    "Repères magnétiques, alignement et distribution",
+    "Transitions et animations d'apparition",
+    "Notes de l'orateur et mode présentateur avec chronomètre",
+    "Écran public sur un second affichage",
+    "Trieuse de diapositives par glisser-déposer",
+    "Ouvre et enregistre PowerPoint (.pptx)",
+    "Export PDF, images et documents à distribuer",
+    "Modèles : réunion de service, bilan de projet, formation"
+  ],
+  "captures": [],
+  "versions": []
+}

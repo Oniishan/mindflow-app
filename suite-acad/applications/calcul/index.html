@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calcul</title>
+<link rel="stylesheet" href="commun/atelier.css">
+<link rel="stylesheet" href="calcul.css">
+<style id="style-impression" media="print"></style>
+</head>
+<body data-app="calcul">
+<div class="appli">
+  <div class="barre-titre" id="barre-titre"></div>
+  <div id="zone-ruban"></div>
+  <div class="barre-formule">
+    <input id="zone-nom" class="zone-nom" aria-label="Zone Nom" title="Zone Nom : tapez une adresse (ex. B12) puis Entrée">
+    <button class="btn-r" id="b-fx" title="Insérer une fonction" aria-label="Insérer une fonction"><i class="fx">fx</i></button>
+    <div class="saisie-formule-cont"><textarea id="saisie-formule" class="saisie-formule" rows="1" spellcheck="false" aria-label="Contenu de la cellule"></textarea></div>
+  </div>
+  <div class="zone-grille" id="zone-grille">
+    <div class="coin" id="coin" title="Sélectionner tout"></div>
+    <div class="cont-ec" id="cont-ec"><div class="entetes-col" id="entetes-col"></div></div>
+    <div class="cont-el" id="cont-el"><div class="entetes-lig" id="entetes-lig"></div></div>
+    <div class="defile" id="defile" tabindex="-1"><div class="contenu" id="contenu"><div class="calque-cellules" id="calque-cellules"></div><div class="calque-graphiques" id="calque-graphiques"></div></div></div>
+    <div class="fige fige-haut" id="fige-haut"><div class="int" id="fige-haut-int"></div></div>
+    <div class="fige fige-gauche" id="fige-gauche"><div class="int" id="fige-gauche-int"></div></div>
+    <div class="fige fige-coin" id="fige-coin"></div>
+    <div class="calque-vue" id="calque-vue"><div class="sel-plage" id="sel-plage"></div><div class="sel-active" id="sel-active"></div><div class="poignee" id="poignee" title="Faites glisser pour recopier"></div><div class="sel-copie masque" id="sel-copie"></div><div class="sel-recopie masque" id="sel-recopie"></div><div id="calque-refs"></div></div>
+    <textarea class="recepteur" id="recepteur" aria-label="Grille" spellcheck="false"></textarea>
+    <div class="editeur masque" id="editeur"><textarea id="editeur-texte" spellcheck="false" aria-label="Modifier la cellule"></textarea></div>
+    <div class="aide-fonction masque" id="aide-fonction"></div>
+    <div class="infobulle-note masque" id="infobulle-note"></div>
+  </div>
+  <div class="barre-onglets" id="barre-onglets"></div>
+  <div class="barre-etat" id="barre-etat"></div>
+</div>
+<div class="zone-impression" id="zone-impression"></div>
+<script type="module" src="calcul.js"></script>
+</body>
+</html>

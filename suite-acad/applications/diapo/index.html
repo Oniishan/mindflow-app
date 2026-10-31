@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diapo</title>
+<link rel="stylesheet" href="commun/atelier.css">
+<link rel="stylesheet" href="diapo.css">
+<style id="style-impression" media="print"></style>
+</head>
+<body data-app="diapo">
+<div class="appli" id="appli">
+  <div class="barre-titre" id="barre-titre"></div>
+  <div id="zone-ruban"></div>
+  <div class="corps-app">
+    <aside class="panneau-diapos" id="panneau-diapos" aria-label="Diapositives"></aside>
+    <div class="centre-edition">
+      <div class="scene" id="scene" tabindex="-1">
+        <div class="cadre" id="cadre"><div class="diapo" id="diapo"></div><div class="calque-sel" id="calque-sel"></div><div class="guides" id="guides"></div></div>
+      </div>
+      <div class="separateur-notes" id="sep-notes" title="Faites glisser pour redimensionner"></div>
+      <div class="zone-notes" id="zone-notes"><textarea id="notes" placeholder="Cliquez pour ajouter des commentaires (notes de l'orateur)" aria-label="Notes de l'orateur"></textarea></div>
+    </div>
+  </div>
+  <div class="barre-etat" id="barre-etat"></div>
+</div>
+<div class="trieuse masque" id="trieuse"></div>
+<div class="diaporama masque" id="diaporama" tabindex="0"><div class="ecran" id="ecran"></div><div class="presentateur masque" id="presentateur"></div><div class="aide-diaporama" id="aide-diaporama"></div></div>
+<div class="zone-impression" id="zone-impression"></div>
+<script src="commun/vendor/pptxgen.bundle.js"></script>
+<script type="module" src="diapo.js"></script>
+</body>
+</html>

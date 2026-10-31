@@ -1,0 +1,40 @@
+{
+  "id": "calcul",
+  "nom": "Calcul",
+  "slogan": "Tableurs et données",
+  "inspire": "Excel, Calc",
+  "categorie": "classique",
+  "ordre": 2,
+  "couleur": "#1E7444",
+  "lettre": "Ca",
+  "iconeRessource": 3,
+  "description": "Le tableur de la suite : formules en français comme dans Excel, mise en forme, tri et filtres, graphiques, plusieurs feuilles. Ouvre et enregistre les classeurs Excel (.xlsx), OpenDocument (.ods) et CSV.",
+  "formats": [
+    {
+      "ext": "xlsx",
+      "description": "Classeur Excel"
+    },
+    {
+      "ext": "ods",
+      "description": "Classeur OpenDocument"
+    },
+    {
+      "ext": "csv",
+      "description": "Fichier CSV"
+    }
+  ],
+  "fonctionnalites": [
+    "Plus de 120 fonctions en français (SOMME, SI, RECHERCHEV, NB.SI…)",
+    "Formats de nombres, dates, monétaires et pourcentages",
+    "Mise en forme des cellules, bordures, fusion",
+    "Mise en forme conditionnelle et validation des données",
+    "Tri, filtres automatiques, figer les volets",
+    "Poignée de recopie et séries automatiques",
+    "Graphiques : colonnes, barres, lignes, secteurs, nuage",
+    "Plusieurs feuilles, références entre feuilles",
+    "Ouvre et enregistre Excel (.xlsx), OpenDocument (.ods) et CSV",
+    "Modèles : budget, inventaire, suivi, notes de frais, planning"
+  ],
+  "captures": [],
+  "versions": []
+}
