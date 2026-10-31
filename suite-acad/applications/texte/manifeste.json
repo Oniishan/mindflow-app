@@ -1,5 +1,6 @@
 {
   "id": "texte",
+  "version": "1.2.0",
   "nom": "Texte",
   "slogan": "Rédaction et mise en forme de documents",
   "inspire": "Word, Writer",
@@ -36,5 +37,11 @@
     "Récupération automatique en cas de fermeture imprévue"
   ],
   "captures": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "1.2.0",
+      "date": "2026-10-31",
+      "notes": "Enregistrement sûr commun à la suite : le document produit n'est jamais vide, le fichier écrit est relu et comparé (SHA-256) après l'écriture atomique."
+    }
+  ]
 }

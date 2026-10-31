@@ -1,5 +1,6 @@
 {
   "id": "depannage",
+  "version": "1.2.0",
   "nom": "Dépannage",
   "slogan": "Débloquer et réparer Excel et les classeurs",
   "inspire": "",
@@ -23,5 +24,11 @@
     "Historique des corrections, annulables"
   ],
   "captures": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "1.2.0",
+      "date": "2026-10-31",
+      "notes": "Enregistrement sûr commun à la suite : le document produit n'est jamais vide, le fichier écrit est relu et comparé (SHA-256) après l'écriture atomique."
+    }
+  ]
 }

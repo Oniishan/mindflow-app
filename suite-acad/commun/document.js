@@ -1,13 +1,17 @@
 // Suite Acad’ — cycle de vie d'un document (nouveau, ouvrir, enregistrer, exporter, récupérer) et menu Fichier
 import { $, $$, el, esc, ico, toast, confirmer, dialogue, raccourcis, extension, nomSansExtension, appliquerTheme, formatOctets, menu } from './ui.js';
 import * as F from './fichiers.js';
+import { ouvrirHistorique, ETATS, sha256, octetsDe, RETENTION_DEFAUT } from './versions.js';
 
 export function creerDocument(cfg) {
   const {
     app, nomApp, lettre, barreTitre,
     formatsOuverture = [], formatsEnregistrement = [], exports = [], modeles = [],
-    nouveau, charger, informations, optionsApp, apresChargement, intercepter
+    nouveau, charger, informations, optionsApp, apresChargement, intercepter,
+    historique: cfgHistorique, verifierOctets, avantEnregistrement
   } = cfg;
+  // Historique des versions (points de restauration) : actif seulement dans l'application installée
+  const H = cfgHistorique && F.NATIF ? ouvrirHistorique(cfgHistorique.espace || app, { verifierContenu: verifierOctets }) : null;
   const doc = { nom: 'Sans titre', chemin: null, format: formatsEnregistrement[0]?.ext, prefs: {} };
   // chaque modification incrémente une révision : la récupération automatique ne réécrit que si le document a changé
   let _modifie = false, revision = 0, revisionSauvee = 0;
@@ -19,6 +23,7 @@ export function creerDocument(cfg) {
     <button class="btn-t" data-a="enregistrer" title="Enregistrer (Ctrl+S)" aria-label="Enregistrer">${ico('save', 'p')}</button>
     <button class="btn-t" data-a="annuler" title="Annuler (Ctrl+Z)" aria-label="Annuler">${ico('undo-2', 'p')}</button>
     <button class="btn-t" data-a="retablir" title="Rétablir (Ctrl+Y)" aria-label="Rétablir">${ico('redo-2', 'p')}</button>
+    ${cfgHistorique ? `<button class="btn-t" data-a="historique" title="Historique des versions" aria-label="Historique des versions">${ico('history', 'p')}</button>` : ''}
     <button class="nom-doc" title="Renommer le document">Sans titre</button><span class="etat-doc"></span>
     <span class="espace"></span>
     <label class="recherche-cmd" title="Rechercher une commande (Alt+Q)">${ico('search', 'p')}<input type="search" placeholder="Rechercher une commande" aria-label="Rechercher une commande"></label>
@@ -27,6 +32,7 @@ export function creerDocument(cfg) {
   $('[data-a="enregistrer"]', barreTitre).onclick = () => doc.enregistrer();
   $('[data-a="annuler"]', barreTitre).onclick = () => cfg.annuler && cfg.annuler();
   $('[data-a="retablir"]', barreTitre).onclick = () => cfg.retablir && cfg.retablir();
+  if (cfgHistorique) $('[data-a="historique"]', barreTitre).onclick = () => doc.ouvrirCoulisses('historique');
   nomEl.onclick = async () => {
     const r = await dialogue({ titre: 'Renommer', contenu: `<label class="champ">Nom du document<input type="text" name="nom" value="${esc(nomSansExtension(doc.nom))}"></label>`, boutons: [{ label: 'Annuler', valeur: null }, { label: 'Renommer', valeur: true, primaire: true }] });
     if (r && r.nom.trim()) { doc.nom = r.nom.trim() + (doc.format ? '.' + doc.format : ''); if (doc.chemin) { doc.chemin = null; } majTitre(); doc.marquerModifie(); }
@@ -104,17 +110,71 @@ export function creerDocument(cfg) {
   };
   async function ecrireAvec(fmt, chemin) {
     try {
-      const octets = await fmt.ecrire();
-      const r = await F.enregistrerFichier({ octets, chemin, nomSuggere: nomSansExtension(doc.nom), filtres: [{ nom: fmt.nom, ext: [fmt.ext] }] });
+      const octets = await octetsDe(await fmt.ecrire());
+      if (!octets.length) throw new Error('le fichier produit est vide : rien n\'a été écrit');
+      // 1. contrôler le fichier produit AVANT de toucher au disque
+      if (verifierOctets) {
+        const v = await verifierOctets(octets, fmt.ext);
+        if (!v.ok) throw new Error(`le fichier produit ne se relit pas (${v.detail || 'contenu invalide'}) : rien n'a été écrit, le fichier existant est intact`);
+      }
+      if (avantEnregistrement && (await avantEnregistrement({ fmt, chemin, octets, doc })) === false) return false;
+      const r = await ecrireSur(chemin, octets, { nomSuggere: nomSansExtension(doc.nom), filtres: [{ nom: fmt.nom, ext: [fmt.ext] }], raisonAvant: 'Avant enregistrement', raisonApres: 'Enregistrement' });
       if (!r) return false;
       doc.chemin = r.chemin; doc.nom = r.nom; doc.format = fmt.ext; doc.modifie = false; majTitre();
       if (r.chemin) F.ajouterRecent(app, r.chemin, r.nom);
       effacerRecuperation();
-      toast(`Enregistré : ${r.nom}`, 'succes');
+      toast(`Enregistré : ${r.nom}${r.verifie ? ' (relu et vérifié)' : ''}`, 'succes');
       fermerCoulisses();
       return true;
-    } catch (e) { console.error(e); toast(`Échec de l'enregistrement : ${e.message || e}`, 'erreur'); return false; }
+    } catch (e) {
+      console.error(e);
+      toast(`Échec de l'enregistrement : ${e.message || e}`, 'erreur', H ? { duree: 12000, action: { label: 'Historique', faire: () => doc.ouvrirCoulisses('historique') } } : {});
+      return false;
+    }
   }
+
+  /**
+   * Écriture sûre d'un fichier :
+   *  1. point de restauration de la version présente sur le disque (si elle existe) ;
+   *  2. écriture atomique par le moteur local (fichier temporaire puis remplacement) ;
+   *  3. relecture et comparaison SHA-256 ;
+   *  4. copie de la nouvelle version dans l'historique.
+   * En cas d'échec, la version précédente reste sur le disque (écriture atomique) et dans l'historique.
+   */
+  async function ecrireSur(chemin, octets, { nomSuggere, filtres, raisonAvant, raisonApres, origine = app } = {}) {
+    if (!F.NATIF) return F.enregistrerFichier({ octets, chemin, nomSuggere, filtres });
+    if (!chemin) {
+      const c = await F.appelApi('/api/fichier/choisir-enregistrement', { nomSuggere, filtres, titre: 'Enregistrer sous' });
+      if (!c || c.annule) return null;
+      chemin = c.chemin;
+    }
+    const nom = chemin.split(/[\\/]/).pop();
+    if (H && await F.fichierExiste(chemin)) {
+      let actuel = null;
+      try { actuel = await F.lireChemin(chemin); } catch (e) {
+        const r = await dialogue({ titre: 'Fichier actuel illisible', contenu: `<p>Le fichier « ${esc(nom)} » existe mais ne peut pas être lu (${esc(e.message)}). Il est peut-être ouvert dans une autre application.</p><p>Aucun point de restauration ne peut donc être créé avant de le remplacer.</p>`, boutons: [{ label: 'Annuler', valeur: null }, { label: 'Remplacer quand même', valeur: true, danger: true }] });
+        if (!r) return null;
+      }
+      if (actuel) {
+        try { await H.capturer({ octets: actuel, chemin, nom, raison: raisonAvant || 'Avant remplacement', origine }); }
+        catch (e) {
+          const r = await dialogue({ titre: 'Point de restauration impossible', contenu: `<p>La version actuelle de « ${esc(nom)} » n'a pas pu être copiée dans l'historique : ${esc(e.message)}.</p><p>Si vous continuez, elle sera remplacée sans copie de secours.</p>`, boutons: [{ label: 'Annuler', valeur: null }, { label: 'Remplacer sans copie', valeur: true, danger: true }] });
+          if (!r) return null;
+        }
+      }
+    }
+    await F.enregistrerFichier({ octets, chemin });
+    // relecture : le fichier sur le disque doit être identique octet pour octet
+    let relu = null; try { relu = await F.lireChemin(chemin); } catch { }
+    const attendu = await sha256(octets);
+    if (!relu || relu.length !== octets.length || await sha256(relu) !== attendu) {
+      throw new Error(`le fichier « ${nom} » relu sur le disque ne correspond pas à ce qui a été enregistré${H ? ' ; la version précédente est conservée dans l\'historique' : ''}`);
+    }
+    if (H) { try { await H.capturer({ octets, chemin, nom, raison: raisonApres || 'Enregistrement', origine }); } catch (e) { toast(`Enregistré, mais la copie dans l'historique a échoué : ${e.message}`, 'alerte'); } }
+    return { chemin, nom, verifie: true };
+  }
+  doc.ecrireSur = ecrireSur;
+  doc.historique = H;
   doc.enregistrerSous = async (ext) => {
     let fmt = formatEnr(ext) || formatEnr(doc.format) || formatsEnregistrement[0];
     if (!ext && formatsEnregistrement.length > 1 && !F.NATIF) {
@@ -209,6 +269,7 @@ export function creerDocument(cfg) {
         <button data-s="nouveau">${ico('file-plus')}<span>Nouveau</span></button>
         <button data-s="ouvrir">${ico('folder-open')}<span>Ouvrir</span></button>
         <button data-s="infos">${ico('info')}<span>Informations</span></button>
+        ${cfgHistorique ? `<button data-s="historique">${ico('history')}<span>Historique des versions</span></button>` : ''}
         ${F.NATIF ? `<button data-s="externe">${ico('external-link')}<span>Ouvrir avec…</span></button>` : ''}
         <hr>
         <button data-s="enregistrer">${ico('save')}<span>Enregistrer</span></button>
@@ -262,6 +323,7 @@ export function creerDocument(cfg) {
           ${doc.chemin && F.NATIF ? `<p style="margin-top:18px"><button class="btn" data-a="explorer">${ico('folder')}Afficher dans l'Explorateur</button></p>` : ''}`;
         const be = $('[data-a="explorer"]', panneau); if (be) be.onclick = () => F.afficherDansExplorateur(doc.chemin);
       }
+      if (s === 'historique') return rendreHistorique(panneau);
       if (s === 'exporter') {
         panneau.innerHTML = `<h1>Exporter</h1><div class="actions-c"></div>`;
         const z = $('.actions-c', panneau);
@@ -281,6 +343,132 @@ export function creerDocument(cfg) {
     await afficher(section);
     $('nav [data-s="retour"]', coulisses).focus();
   };
+  // ----- Historique des versions -----
+  const dateLongue = d => new Date(d).toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const ORIGINES = { calcul: 'Calcul', depannage: 'Dépannage', texte: 'Texte', pdf: 'PDF' };
+  const pastille = e => {
+    const et = ETATS[e.etat] || { label: e.etat, sain: false };
+    const cls = et.sain ? 'ok' : (e.etat === 'verifiee-non-lisible' ? 'attention' : 'ko');
+    return `<span class="pastille-etat ${cls}" title="${esc(et.detail || '')}">${ico(et.sain ? 'circle-check' : cls === 'attention' ? 'triangle-alert' : 'circle-x', 'p')}${esc(et.label)}</span>`;
+  };
+  async function rendreHistorique(panneau) {
+    if (!H) {
+      panneau.innerHTML = `<h1>Historique des versions</h1><p class="texte-aide">L'historique des versions n'est disponible que dans l'application installée sur le poste (il s'appuie sur le dossier de données de Suite Acad’).</p>`;
+      return;
+    }
+    panneau.innerHTML = `<h1>Historique des versions</h1>
+      <div class="hist-entete">
+        <div class="hist-filtre" role="radiogroup" aria-label="Classeurs affichés">
+          <label><input type="radio" name="portee" value="doc" ${doc.chemin ? 'checked' : 'disabled'}> Ce document${doc.chemin ? '' : ' (pas encore enregistré)'}</label>
+          <label><input type="radio" name="portee" value="tout" ${doc.chemin ? '' : 'checked'}> Tous les documents</label>
+        </div>
+        <label class="champ-ligne">Conserver les versions
+          <select name="retention">${[7, 14, 30, 60, 90, 180, 365].map(j => `<option value="${j}">${j} jours${j === RETENTION_DEFAUT ? ' (par défaut)' : ''}</option>`).join('')}</select></label>
+      </div>
+      <p class="texte-aide">Sélectionnez une version puis cliquez sur <b>Restaurer…</b> et confirmez. Avant tout remplacement, la version actuelle est elle-même copiée dans l'historique.</p>
+      <div class="hist-liste" aria-live="polite"><p class="texte-aide">Chargement…</p></div>
+      <details class="hist-limites"><summary>${ico('info', 'p')} Ce que l'historique protège… et ses limites</summary>
+        <ul>
+          <li>Une copie est créée à chaque enregistrement fait dans ${esc(nomApp)}, avant chaque remplacement d'un fichier existant, avant chaque restauration et avant les réparations ou conversions lancées depuis Dépannage.</li>
+          <li>Chaque copie est relue et comparée à l'original (empreinte SHA-256) avant d'être déclarée « Vérifiée ». Le fichier enregistré est lui aussi relu après écriture ; l'écriture se fait dans un fichier temporaire remplacé d'un seul coup, si bien qu'une coupure laisse l'ancienne version intacte.</li>
+          <li>Les modifications faites par d'autres logiciels (Excel, LibreOffice…) entre deux enregistrements dans ${esc(nomApp)} ne sont pas capturées.</li>
+          <li>Les suppressions, déplacements et renommages faits dans l'Explorateur Windows ne sont pas suivis : les copies restent rattachées à l'ancien emplacement. « Remplacer » recrée le fichier à cet emplacement ; « Restaurer sous un nouveau nom… » permet de le recréer ailleurs.</li>
+          <li>Les copies sont stockées sur ce poste, dans le dossier de données de Suite Acad’ de votre session Windows : elles ne protègent pas contre la perte ou la réinstallation du poste.</li>
+          <li>Les copies plus anciennes que la durée choisie sont supprimées automatiquement, mais <b>jamais la dernière copie saine</b> d'un document.</li>
+        </ul></details>`;
+    const zl = $('.hist-liste', panneau), selR = $('[name="retention"]', panneau);
+    selR.value = String(await H.retention().catch(() => RETENTION_DEFAUT));
+    if (!selR.value) selR.value = String(RETENTION_DEFAUT);
+    selR.onchange = async () => {
+      try { const r = await H.definirRetention(+selR.value); toast(`Versions conservées ${selR.value} jours${r.supprimees ? ` — ${r.supprimees} copie(s) ancienne(s) supprimée(s)` : ''}.`, 'succes'); remplir(); }
+      catch (e) { toast('Réglage non enregistré : ' + e.message, 'erreur'); }
+    };
+    $$('[name="portee"]', panneau).forEach(r => r.onchange = remplir);
+    async function remplir() {
+      const portee = $('[name="portee"]:checked', panneau)?.value || 'tout';
+      let l;
+      try { l = await H.lister(portee === 'doc' ? { chemin: doc.chemin } : {}); }
+      catch (e) { zl.innerHTML = `<p class="texte-aide">Historique illisible : ${esc(e.message)}</p>`; return; }
+      if (!l.length) { zl.innerHTML = `<div class="vide">${portee === 'doc' ? 'Aucune version de ce document pour l\'instant. Une copie sera créée au prochain enregistrement.' : 'Aucune version enregistrée pour l\'instant.'}</div>`; return; }
+      zl.innerHTML = `<table class="tab-hist"><thead><tr><th>Date</th><th>Document</th><th>Format</th><th>Taille</th><th>Origine</th><th>État</th><th></th></tr></thead><tbody></tbody></table>`;
+      const tb = $('tbody', zl);
+      l.forEach(e => {
+        const tr = el(`<tr tabindex="0" data-id="${esc(e.id)}">
+          <td class="nowrap">${esc(dateLongue(e.date))}</td>
+          <td class="doc-cell"><b>${esc(e.nom)}</b><small title="${esc(e.chemin || '')}">${esc(e.chemin || 'Non enregistré')}</small></td>
+          <td>${esc(e.format ? '.' + e.format : '—')}</td>
+          <td class="nowrap">${esc(formatOctets(e.taille))}</td>
+          <td>${esc(e.raison)}<small>${esc(ORIGINES[e.origine] || e.origine || '')}</small></td>
+          <td>${pastille(e)}${e.derniereSaine ? '<small class="derniere">Dernière copie saine</small>' : ''}${e.expiree && e.derniereSaine ? '<small>Conservée au-delà de la durée choisie</small>' : ''}</td>
+          <td class="nowrap"><button class="btn primaire petit" data-r ${ETATS[e.etat]?.sain || e.etat === 'verifiee-non-lisible' ? '' : 'disabled'}>${ico('archive-restore', 'p')}Restaurer…</button>
+            <button class="btn discret icone petit" data-plus aria-label="Autres actions">${ico('ellipsis', 'p')}</button></td></tr>`);
+        $('[data-r]', tr).onclick = () => restaurerVersion(e).then(ok => ok ? fermerCoulisses() : remplir());
+        $('[data-plus]', tr).onclick = ev => menu([
+          { label: 'Restaurer sous un nouveau nom…', ico: 'save-all', faire: () => restaurerVersion(e, 'nouveau').then(ok => ok ? fermerCoulisses() : remplir()) },
+          { label: 'Ouvrir une copie sans remplacer', ico: 'folder-open', faire: () => ouvrirCopie(e) },
+          ...(e.chemin ? [{ label: 'Afficher le dossier d\'origine', ico: 'folder', faire: () => F.afficherDansExplorateur(e.chemin) }] : []),
+          '-',
+          { label: 'Supprimer cette copie', ico: 'trash-2', desactive: e.derniereSaine, faire: async () => { if (!(await confirmer('Supprimer la copie', `Supprimer définitivement la copie du ${dateLongue(e.date)} ?`, 'Supprimer', true))) return; try { await H.supprimer(e); remplir(); } catch (x) { toast(x.message, 'erreur'); } } },
+        ], 0, 0, ev.currentTarget);
+        tr.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target === tr) $('[data-r]', tr).click(); });
+        tb.appendChild(tr);
+      });
+    }
+    await remplir();
+  }
+
+  /** Ouvre une ancienne version dans l'application, sans toucher au fichier d'origine. */
+  async function ouvrirCopie(e) {
+    try {
+      const octets = await H.lireCopie(e);
+      if (!(await doc.verifierAbandon())) return;
+      const nom = `${nomSansExtension(e.nom)} (version du ${new Date(e.date).toLocaleDateString('fr-FR')}).${e.format}`;
+      const ok = await chargerFichier({ nom, chemin: null, octets }, { ignorerAbandon: true });
+      if (ok) { doc.chemin = null; doc.nom = nomSansExtension(nom) + '.' + doc.format; doc.modifie = true; majTitre(); toast('Copie ouverte : enregistrez-la sous un nouveau nom pour la conserver.', 'info'); }
+    } catch (x) { toast('Ouverture impossible : ' + x.message, 'erreur'); }
+  }
+
+  /**
+   * Restaure une version : mode « remplacer » (emplacement d'origine) ou « nouveau » (nouveau nom).
+   * La version actuelle (fichier sur le disque et modifications non enregistrées) est copiée avant.
+   */
+  async function restaurerVersion(e, mode) {
+    let octets;
+    try { octets = await H.lireCopie(e); } catch (x) { toast('Restauration impossible : ' + x.message, 'erreur'); return false; }
+    if (verifierOctets) {
+      const v = await verifierOctets(octets, e.format);
+      if (!v.ok && !(await confirmer('Version illisible', `Cette copie est exacte mais son contenu ne se relit pas correctement (${v.detail || 'contenu invalide'}). La restaurer quand même ?`, 'Restaurer quand même', true))) return false;
+    }
+    if (!mode) {
+      const existe = e.chemin ? await F.fichierExiste(e.chemin) : false;
+      const r = await dialogue({
+        titre: 'Restaurer cette version ?',
+        contenu: `<p><b>${esc(e.nom)}</b> — version du ${esc(dateLongue(e.date))} (${esc(formatOctets(e.taille))}, ${esc(e.raison.toLowerCase())}).</p>
+          ${e.chemin ? `<p>${existe ? 'Le fichier actuel' : 'Le fichier, aujourd\'hui absent de son emplacement,'} <code>${esc(e.chemin)}</code> ${existe ? 'sera remplacé par cette version. <b>Il est d\'abord copié dans l\'historique</b> : vous pourrez revenir en arrière.' : 'sera recréé à cet emplacement.'}</p>` : '<p>Ce document n\'avait pas d\'emplacement : choisissez où l\'enregistrer.</p>'}
+          ${doc.modifie ? '<p>Les modifications non enregistrées du document ouvert seront elles aussi copiées dans l\'historique.</p>' : ''}`,
+        boutons: [{ label: 'Annuler', valeur: null }, { label: 'Restaurer sous un nouveau nom…', valeur: 'nouveau', id: 'nouveau' }, ...(e.chemin ? [{ label: existe ? 'Remplacer le fichier actuel' : 'Recréer le fichier', valeur: 'remplacer', primaire: true, id: 'remplacer' }] : [])]
+      });
+      if (!r) return false;
+      mode = r.valeur;
+    }
+    // copie de sécurité des modifications non enregistrées du document ouvert
+    if (doc.modifie && formatEnr(doc.format)) {
+      try { await H.capturer({ octets: await octetsDe(await formatEnr(doc.format).ecrire()), chemin: doc.chemin, nom: doc.nom, raison: 'Modifications non enregistrées (avant restauration)', origine: app }); }
+      catch (x) { if (!(await confirmer('Copie impossible', `Les modifications non enregistrées n'ont pas pu être copiées (${x.message}). Elles seront perdues. Continuer ?`, 'Continuer', true))) return false; }
+    }
+    try {
+      const filtres = [{ nom: 'Fichier .' + e.format, ext: [e.format] }];
+      const nomSuggere = `${nomSansExtension(e.nom)} (restauré le ${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')})`;
+      const r = await ecrireSur(mode === 'remplacer' ? e.chemin : null, octets, { nomSuggere, filtres, raisonAvant: 'Avant restauration', raisonApres: 'Version restaurée' });
+      if (!r) return false;
+      doc.modifie = false;
+      const ok = await chargerFichier({ nom: r.nom, chemin: r.chemin, octets }, { ignorerAbandon: true });
+      toast(`Version du ${new Date(e.date).toLocaleString('fr-FR')} restaurée dans « ${r.nom} » (relue et vérifiée).${mode === 'remplacer' ? ' La version remplacée est conservée dans l\'historique.' : ''}`, 'succes', { duree: 8000 });
+      return ok !== false;
+    } catch (x) { console.error(x); toast('Restauration impossible : ' + (x.message || x) + ' — le fichier actuel n\'a pas été modifié.', 'erreur', { duree: 12000 }); return false; }
+  }
+  doc.restaurerVersion = restaurerVersion;
+
   async function rendreRecents(zone, n) {
     const l = (await F.recents(app)).slice(0, n);
     if (!l.length) { zone.innerHTML = `<div class="vide">Les documents que vous ouvrez apparaîtront ici.</div>`; return; }
@@ -309,6 +497,8 @@ export function creerDocument(cfg) {
     await nouveau();
     majTitre();
     const ses = F.SESSION;
+    // contrôle des copies interrompues par un arrêt inattendu, puis purge selon la durée de conservation
+    if (H && !(ses && ses.diagnostic)) setTimeout(() => H.reparer().then(() => H.purger()).catch(e => console.warn('historique', e)), 1500);
     if (ses && ses.diagnostic) { setTimeout(() => import('./diagnostic.js').then(d => d.lancer(doc, cfg)), 600); return; }
     if (ses && ses.fichier) { await doc.ouvrirChemin(ses.fichier, true); return; }
     if (await proposerRecuperation()) return;

@@ -1,5 +1,6 @@
 {
   "id": "formulaires",
+  "version": "1.2.0",
   "nom": "FonctionGrist",
   "slogan": "Tables de données et formulaires simples",
   "inspire": "Grist, Forms",
@@ -34,5 +35,11 @@
     "Import et export Excel et CSV"
   ],
   "captures": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "1.2.0",
+      "date": "2026-10-31",
+      "notes": "Enregistrement sûr commun à la suite : le document produit n'est jamais vide, le fichier écrit est relu et comparé (SHA-256) après l'écriture atomique."
+    }
+  ]
 }

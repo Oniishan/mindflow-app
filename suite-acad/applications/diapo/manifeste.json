@@ -1,5 +1,6 @@
 {
   "id": "diapo",
+  "version": "1.2.0",
   "nom": "Diapo",
   "slogan": "Présentations et diaporamas",
   "inspire": "PowerPoint, Impress",
@@ -33,5 +34,11 @@
     "Modèles : réunion de service, bilan de projet, formation"
   ],
   "captures": [],
-  "versions": []
+  "versions": [
+    {
+      "version": "1.2.0",
+      "date": "2026-10-31",
+      "notes": "Enregistrement sûr commun à la suite : le document produit n'est jamais vide, le fichier écrit est relu et comparé (SHA-256) après l'écriture atomique."
+    }
+  ]
 }

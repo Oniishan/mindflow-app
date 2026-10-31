@@ -258,3 +258,29 @@ input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:16px;hei
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .barre-titre .tuile.long{width:32px;font-size:11px;letter-spacing:-.02em}
+
+/* ---------- Historique des versions (points de restauration) ---------- */
+.toast.alerte{background:var(--alerte);color:#fff}
+.texte-aide{color:var(--encre-2);max-width:80ch;line-height:1.5}
+.hist-entete{display:flex;flex-wrap:wrap;align-items:center;gap:14px 28px;margin-bottom:6px}
+.hist-filtre{display:flex;gap:16px}
+.hist-filtre label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.champ-ligne{display:flex;align-items:center;gap:8px;color:var(--encre-2)}
+.champ-ligne select{height:30px;border:1px solid var(--ligne-forte);border-radius:var(--rayon-s);background:var(--surface);color:var(--encre);padding:0 6px}
+.hist-liste{margin-top:8px;overflow:auto}
+.tab-hist{border-collapse:collapse;width:100%;min-width:860px;font-size:13px}
+.tab-hist th{text-align:left;font-weight:600;color:var(--encre-2);padding:6px 10px;border-bottom:1px solid var(--ligne-forte);position:sticky;top:0;background:var(--surface)}
+.tab-hist td{padding:8px 10px;border-bottom:1px solid var(--ligne);vertical-align:top}
+.tab-hist tr:hover td,.tab-hist tr:focus-within td{background:var(--survol)}
+.tab-hist tr:focus{outline:2px solid var(--accent);outline-offset:-2px}
+.tab-hist small{display:block;color:var(--encre-3);font-size:12px;max-width:42ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tab-hist small.derniere{color:var(--succes);font-weight:600}
+.tab-hist .nowrap{white-space:nowrap}
+.tab-hist .btn{gap:6px}
+.pastille-etat{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.pastille-etat.ok{background:var(--succes-doux);color:var(--succes)}
+.pastille-etat.attention{background:var(--alerte-doux);color:var(--alerte)}
+.pastille-etat.ko{background:var(--danger-doux);color:var(--danger)}
+.hist-limites{margin-top:22px;max-width:90ch;color:var(--encre-2);line-height:1.5}
+.hist-limites summary{cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px}
+.hist-limites li{margin:6px 0}

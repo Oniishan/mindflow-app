@@ -1383,6 +1383,15 @@ function chargerClasseur(c) {
   S.r = S.c = S.r1 = S.c1 = S.r2 = S.c2 = 0;
   toutRecalculer(); selectionner(0, 0);
 }
+/** Contrôle qu'un fichier de classeur se relit (utilisé avant écriture, pour l'historique et la restauration). */
+async function verifierClasseur(octets, ext) {
+  try {
+    if (!octets || !octets.length) return { ok: false, detail: 'fichier vide' };
+    const c = await lireClasseur(octets, ext === 'xls' ? 'xls' : ext);
+    if (!c || !c.feuilles || !c.feuilles.length) return { ok: false, detail: 'aucune feuille lisible' };
+    return { ok: true, detail: `${c.feuilles.length} feuille(s) relue(s)` };
+  } catch (e) { return { ok: false, detail: e.message || String(e) }; }
+}
 const doc = creerDocument({
   focus: () => $('#recepteur').focus({ preventScroll: true }),
   app: 'calcul', nomApp: 'Calcul', lettre: 'Ca', barreTitre: $('#barre-titre'),
@@ -1396,6 +1405,9 @@ const doc = creerDocument({
     { id: 'html', label: 'Page web (.html)', ico: 'globe', ext: 'html', desc: 'Tableau de la feuille active.', ecrire: async () => { preparerImpression(false); return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${esc(F().nom)}</title><style>table{border-collapse:collapse;font:13px Calibri,Arial,sans-serif}td{border:1px solid #ccc;padding:2px 6px}</style></head><body>${$('#zone-impression').innerHTML}</body></html>`; } },
   ],
   modeles: MODELES,
+  // historique des versions partagé avec Dépannage (espace « classeurs »)
+  historique: { espace: 'classeurs' },
+  verifierOctets: verifierClasseur,
   async nouveau(modele) { chargerClasseur((modele || MODELES[0]).creer()); },
   async charger({ octets, ext }) {
     if (ext === 'xls') throw new Error('l\'ancien format .xls n\'est lu qu\'en partie : enregistrez-le d\'abord en .xlsx');

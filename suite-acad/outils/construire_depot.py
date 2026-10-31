@@ -94,8 +94,7 @@ def main():
         man = json.load(open(man_p, encoding='utf-8'))
         version = man.get('version')
         if not version:
-            print(f'{app} : pas de champ « version » dans manifeste.json, ignoré', file=sys.stderr)
-            continue
+            raise SystemExit(f'{app} : champ « version » absent de manifeste.json')
         nom_zip = f'{app}-{version}.zip'
         dest = os.path.join(out, 'applications', nom_zip)
         construire_zip(app, dest)
