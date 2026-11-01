@@ -2,6 +2,7 @@
 import { $, $$, el, esc, ico, toast, dialogue, confirmer, demander, menu, fermerMenu, creerRuban, raccourcis, debounce, nomSansExtension } from './commun/ui.js';
 import { creerDocument } from './commun/document.js';
 import * as Fi from './commun/fichiers.js';
+import { analyserPdf, pdfVersDocx, ocrDisponible } from './versword.js';
 import { pdfjs, SOURCES, A4, chargerSource, rendrePage, construire, ouvrirPourLecture, texteDuDocument, pageEnImage, preparerImage, dimsAffichage } from './moteur.js';
 
 // ---------- État ----------
@@ -797,6 +798,38 @@ async function exporterImages() {
   }
   pdf.destroy(); toast(`${pdf.numPages} image${pdf.numPages > 1 ? 's' : ''} exportée${pdf.numPages > 1 ? 's' : ''}.`, 'succes');
 }
+/** PDF → Word modifiable : analyse, explication des limites, conversion, contrôle, enregistrement sans toucher l'original. */
+async function convertirEnWord() {
+  if (!P.pages.length) { toast('Ouvrez d\'abord un PDF.', 'info'); return; }
+  let pdf, analyse;
+  try { pdf = await ouvrirPourLecture(await construire({ ...P, protection: null }, { medias: M })); analyse = await analyserPdf(pdf); }
+  catch (e) { toast('Analyse du PDF impossible : ' + e.message, 'erreur'); pdf?.destroy(); return; }
+  const ocr = ocrDisponible();
+  if (!analyse.avecTexte && !analyse.numerisees) { pdf.destroy(); toast('Ce PDF ne contient ni texte ni image à convertir : aucun document Word n\'a été créé.', 'erreur'); return; }
+  const r = await dialogue({ titre: 'Convertir en document Word (.docx)', taille: 'large', contenu: `
+    <p><b>Analyse :</b> ${analyse.nPages} page(s) — texte détecté sur ${analyse.avecTexte} page(s)${analyse.numerisees ? `, <b>${analyse.numerisees} page(s) numérisée(s)</b> (images sans texte)` : ''}.</p>
+    ${analyse.numerisees ? `<div class="avert-pp" style="display:flex;gap:8px;padding:8px 12px;border-radius:8px;background:var(--alerte-doux)">${ico('triangle-alert', 'p')}<span>${ocr ? 'Un moteur de reconnaissance de texte (OCR) est disponible sur ce poste : le texte des pages numérisées sera reconnu automatiquement. Relisez-le, des erreurs sont possibles.' : 'Aucun moteur de reconnaissance de texte (OCR) n\'est disponible sur ce poste. Les pages numérisées seront insérées <b>en image</b> dans le document Word : leur texte ne sera pas modifiable.'}</span></div>` : ''}
+    <p>La mise en page est <b>reconstruite</b> : paragraphes, titres, gras et italique sont repris ; les polices exactes, colonnes, tableaux et images des pages de texte peuvent différer. Le PDF d'origine n'est pas modifié. La conversion se fait sur ce poste ; aucun fichier n'est envoyé sur Internet.</p>`,
+    boutons: [{ label: 'Annuler', valeur: null }, { label: 'Convertir', valeur: true, primaire: true, id: 'convertir-word' }] });
+  if (!r) { pdf.destroy(); return; }
+  let res;
+  const t = toast('Conversion en cours…', 'info', { duree: 60000 });
+  try { res = await pdfVersDocx(pdf, analyse, { ocr: true, titre: nomSansExtension(doc.nom) }); }
+  catch (e) { t.remove(); pdf.destroy(); toast('Conversion impossible : ' + e.message, 'erreur'); return; }
+  t.remove(); pdf.destroy();
+  const rp = res.rapport;
+  if (!rp.caracteresDocx && !rp.pagesImage) { toast('La conversion n\'a produit aucun texte : aucun document Word n\'a été enregistré.', 'erreur'); return; }
+  const taux = rp.caracteresPdf ? Math.round(Math.min(rp.caracteresDocx, rp.caracteresPdf) / rp.caracteresPdf * 100) : null;
+  try {
+    const sauve = await doc.ecrireSur(null, res.octets, { nomSuggere: nomSansExtension(doc.nom), filtres: [{ nom: 'Document Word', ext: ['docx'] }] });
+    if (!sauve) return;
+    window.__pdf.dernierWord = { ...rp, chemin: sauve.chemin, taux };
+    dialogue({ titre: 'Document Word créé', boutons: [{ label: 'Fermer', valeur: true, primaire: true }], contenu: `<p><b>${esc(sauve.nom)}</b> a été enregistré, relu et vérifié.</p>
+      <ul><li>${rp.pagesTexte} page(s) de texte converties${taux !== null ? ` — ${taux} % des caractères du PDF retrouvés dans le document Word` : ''}</li>
+      ${rp.pagesOcr ? `<li>${rp.pagesOcr} page(s) numérisée(s) reconnue(s) par OCR</li>` : ''}${rp.pagesImage ? `<li>${rp.pagesImage} page(s) numérisée(s) insérée(s) en image (texte non modifiable)</li>` : ''}</ul>
+      ${rp.avertissements.length ? `<p>À savoir :</p><ul>${rp.avertissements.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : ''}` });
+  } catch (e) { toast('Enregistrement impossible : ' + e.message, 'erreur'); }
+}
 async function exporterTexte() { const pdf = await ouvrirPourLecture(await construire({ ...P, protection: null }, { medias: M })); const t = await texteDuDocument(pdf); pdf.destroy(); return '﻿' + t.replace(/\n/g, '\r\n'); }
 
 // ---------- Barre d'état ----------
@@ -910,6 +943,7 @@ const doc = creerDocument({
   exports: [
     { id: 'pdf', label: 'PDF', ico: 'file-text', ext: 'pdf', desc: 'Copie du document avec les annotations intégrées.', ecrire: documentFinal },
     { id: 'png', label: 'Images PNG (une par page)', ico: 'image', desc: 'Chaque page en image, à 150 points par pouce.', faire: exporterImages },
+    { id: 'docx', label: 'Document Word modifiable (.docx)', ico: 'file-text', desc: 'Texte, titres et mise en forme repris dans un document modifiable. Pages numérisées détectées.', faire: () => convertirEnWord() },
     { id: 'txt', label: 'Texte brut (.txt)', ico: 'file-type', ext: 'txt', desc: 'Le texte du document, sans mise en forme.', ecrire: exporterTexte },
   ],
   modeles: MODELES,
@@ -938,5 +972,5 @@ raccourcis({
   'Escape': () => { if (V.edition || $('.dialogue') || $('.menu-flottant')) return false; if (!$('#organiseur').classList.contains('masque')) { fermerOrganiseur(); return; } if (V.outil !== 'selection') choisirOutil('selection'); else if (V.sel.length) { V.sel = []; rendre(); } else return false; },
   'V': horsSaisie(() => choisirOutil('selection')), 'H': horsSaisie(() => choisirOutil('main')), 'T': horsSaisie(() => choisirOutil('texte')),
 });
-window.__pdf = { P: () => P, M: () => M, V, rendre, allerPage, doc, construire: () => documentFinal(), SOURCES, choisirOutil, insererFichiers, R, surlignerSelection, entrerEdition: (pid, aid) => entrerEdition(pageDe(pid).annots.find(a => a.id === aid), pageDe(pid)), quitterEdition, definirZoom };
+window.__pdf = { convertirEnWord, P: () => P, M: () => M, V, rendre, allerPage, doc, construire: () => documentFinal(), SOURCES, choisirOutil, insererFichiers, R, surlignerSelection, entrerEdition: (pid, aid) => entrerEdition(pageDe(pid).annots.find(a => a.id === aid), pageDe(pid)), quitterEdition, definirZoom };
 (async () => { await doc.demarrer(); rendre(true); ruban.actif('v-miniatures', true); vis.focus(); })();

@@ -33,7 +33,7 @@
     {
       "version": "1.2.0",
       "date": "2026-10-31",
-      "notes": "Enregistrement sûr commun à la suite : le document produit n'est jamais vide, le fichier écrit est relu et comparé (SHA-256) après l'écriture atomique."
+      "notes": "Conversion en document Word modifiable (.docx) : texte, titres, gras et italique, paragraphes et sauts de page reconstruits ; pages numérisées détectées (OCR local si disponible, sinon insertion en image clairement signalée) ; contrôle du document produit ; aucun envoi de fichier. Enregistrement sûr commun à la suite : le document produit n'est jamais vide, le fichier écrit est relu et comparé (SHA-256) après l'écriture atomique."
     }
   ]
 }

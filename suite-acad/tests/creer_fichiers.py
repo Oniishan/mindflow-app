@@ -142,3 +142,33 @@ t.cell(0, 0).text = 'Courriel'; t.cell(0, 1).text = '{Courriel}'; t.cell(1, 0).t
 d.add_paragraph('Signature : le secrétariat — {Champ inconnu}')
 d.save(p('modele-inscription.docx'))
 print('publipostage : ok')
+
+# ---------- Conversion PDF ----------
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas as rl_canvas
+from PIL import Image, ImageDraw, ImageFont
+def pdf_texte(chemin, avec_scan=False):
+    c = rl_canvas.Canvas(chemin, pagesize=A4); w, h = A4
+    c.setFont('Helvetica-Bold', 20); c.drawString(72, h - 80, 'Rapport annuel 2026')
+    c.setFont('Helvetica', 11); y = h - 120
+    para = ("Le conseil d'administration s'est réuni le 12 mars pour examiner les comptes de l'exercice. "
+            "Les résultats sont conformes aux prévisions et la trésorerie reste saine malgré la hausse des coûts.")
+    from reportlab.lib.utils import simpleSplit
+    for l in simpleSplit(para, 'Helvetica', 11, w - 144): c.drawString(72, y, l); y -= 14
+    y -= 14; c.setFont('Helvetica-Bold', 14); c.drawString(72, y, 'Points importants'); y -= 22
+    c.setFont('Helvetica', 11)
+    for it in ['• Budget voté à l\'unanimité', '• Création de deux postes', '• Rénovation du bâtiment B']: c.drawString(90, y, it); y -= 16
+    y -= 10; c.drawString(72, y, 'Texte en '); c.setFont('Helvetica-Oblique', 11); c.drawString(72 + c.stringWidth('Texte en ', 'Helvetica', 11), y, 'italique')
+    c.setFont('Helvetica', 11); c.drawString(72 + c.stringWidth('Texte en italique', 'Helvetica', 11) + 3, y, 'et en ')
+    c.setFont('Helvetica-Bold', 11); c.drawString(72 + c.stringWidth('Texte en italique et en ', 'Helvetica', 11) + 3, y, 'gras.')
+    c.showPage(); c.setFont('Helvetica', 11); c.drawString(72, h - 80, 'Deuxième page : conclusion et perspectives pour 2027.'); c.showPage()
+    if avec_scan:
+        img = Image.new('RGB', (1240, 1754), 'white'); dr = ImageDraw.Draw(img)
+        try: fnt = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 40)
+        except Exception: fnt = ImageFont.load_default()
+        for k, l in enumerate(['COURRIER NUMÉRISÉ', 'Madame, Monsieur,', 'Veuillez trouver ci-joint la facture.']): dr.text((120, 200 + k * 80), l, fill='black', font=fnt)
+        img.save(p('scan.png')); c.drawImage(p('scan.png'), 0, 0, width=w, height=h); c.showPage(); os.remove(p('scan.png'))
+    c.save()
+pdf_texte(p('rapport.pdf')); pdf_texte(p('mixte.pdf'), avec_scan=True)
+c = rl_canvas.Canvas(p('vierge.pdf'), pagesize=A4); c.showPage(); c.save()
+print('pdf : ok')

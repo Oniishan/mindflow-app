@@ -12,7 +12,7 @@
 
 const MM = 72 / 25.4;
 export const FORMATS_PAGE = { A4: [210, 297], A5: [148, 210], A3: [297, 420], Letter: [215.9, 279.4] };
-const TAILLES_TITRES = { H1: 20, H2: 16, H3: 13.5, H4: 12, H5: 11, H6: 10.5 };
+const TAILLES_TITRES = { H1: 16, H2: 13, H3: 12, H4: 11, H5: 11, H6: 11 };
 
 function couleurCss(c) {
   if (!c) return null;
@@ -30,7 +30,8 @@ function tailleCss(v, base) {
 /**
  * Rend un élément (ou du HTML) en PDF.
  * options : { format: 'A4', paysage, marges: {haut, bas, gauche, droite} (mm), police: 'sans'|'serif',
- *             taille: 11 (pt), titre, auteur, numeros: true }
+ *             taille: 11 (pt), titre, auteur, numeros: true, couleurTitres: '1F3864',
+ *             entete / pied: {gauche, centre, droite} avec {page} et {pages}, premierePageDifferente, filigrane }
  * Renvoie { octets: Uint8Array, pages, avertissements: [] }.
  */
 export async function htmlVersPdf(source, options = {}) {
@@ -51,14 +52,18 @@ export async function htmlVersPdf(source, options = {}) {
   };
   const cachePolices = {};
   const police = async (fam, g, i) => { const k = fam + g + i; if (!cachePolices[k]) cachePolices[k] = await pdf.embedFont(familles[fam][(g ? 1 : 0) + (i ? 2 : 0)]); return cachePolices[k]; };
-  const encodable = new Map();
+  // jeu de caractères réel de chaque police (pdf-lib remplacerait sinon les caractères absents sans le dire)
+  const jeux = new Map();
+  const jeu = fnt => { if (!jeux.has(fnt)) { let c = null; try { c = new Set(fnt.getCharacterSet()); } catch { } jeux.set(fnt, c); } return jeux.get(fnt); };
+  const SUBST = { '→': '->', '←': '<-', '•': '-', '☐': '[ ]', '☑': '[x]', '☒': '[x]', '✓': 'v', '✔': 'v', ' ': ' ', ' ': ' ', ' ': ' ', '−': '-', '≤': '<=', '≥': '>=', '≠': '!=' };
   const nettoyerTexte = (fnt, t) => {
+    const c = jeu(fnt); if (!c) return t;
     let r = '';
     for (const ch of t) {
-      let ok = encodable.get(ch);
-      if (ok === undefined) { try { fnt.encodeText(ch); ok = true; } catch { ok = false; } encodable.set(ch, ok); }
-      if (ok) r += ch;
-      else { const rep = { '’': "'", '‘': "'", '“': '"', '”': '"', '–': '-', '—': '-', '…': '...', ' ': ' ', ' ': ' ', ' ': ' ', '→': '->', '•': '-', '☐': '[ ]', '☑': '[x]', '✓': 'v' }[ch]; if (rep !== undefined && [...rep].every(c => { try { fnt.encodeText(c); return true; } catch { return false; } })) r += rep; else { r += '?'; remplaces.add(ch); } }
+      if (c.has(ch.codePointAt(0)) || ch === ' ') { r += ch; continue; }
+      const rep = SUBST[ch];
+      if (rep !== undefined && [...rep].every(x => c.has(x.codePointAt(0)) || x === ' ')) r += rep;
+      else { r += '?'; remplaces.add(ch); }
     }
     return r;
   };
@@ -67,9 +72,10 @@ export async function htmlVersPdf(source, options = {}) {
   const [lp, hp] = FORMATS_PAGE[o.format] || FORMATS_PAGE.A4;
   const largeurPage = (o.paysage ? hp : lp) * MM, hauteurPage = (o.paysage ? lp : hp) * MM;
   const x0 = o.marges.gauche * MM, largeurUtile = largeurPage - (o.marges.gauche + o.marges.droite) * MM;
-  const yHaut = hauteurPage - o.marges.haut * MM, yBas = o.marges.bas * MM + (o.numeros ? 14 : 0);
+  const yHaut = hauteurPage - o.marges.haut * MM, yBas = o.marges.bas * MM + (o.numeros && !(o.entete || o.pied) ? 14 : 0);
 
   const blocs = []; // {type:'texte', segments, align, retrait, avant, apres, taille, puce} | {type:'tableau'} | {type:'image'} | {type:'saut'} | {type:'filet'}
+  const couleurTitres = o.couleurTitres ? couleurCss('#' + String(o.couleurTitres).replace('#', '')) : null;
   const styleBase = { fam: o.police === 'serif' ? 'serif' : 'sans', gras: false, italique: false, souligne: false, barre: false, couleur: [0, 0, 0], taille: o.taille, lien: null };
   function styleDe(el, herite) {
     const s = { ...herite }; const tag = el.tagName;
@@ -79,7 +85,9 @@ export async function htmlVersPdf(source, options = {}) {
     if (tag === 'S' || tag === 'STRIKE' || tag === 'DEL') s.barre = true;
     if (tag === 'CODE' || tag === 'PRE' || tag === 'KBD' || tag === 'TT') s.fam = 'mono';
     if (tag === 'A' && el.getAttribute('href')) { s.lien = el.getAttribute('href'); s.couleur = [0.05, 0.27, 0.73]; s.souligne = true; }
-    if (TAILLES_TITRES[tag]) s.taille = TAILLES_TITRES[tag] * o.taille / 11;
+    if (TAILLES_TITRES[tag]) { s.taille = TAILLES_TITRES[tag] * o.taille / 11; if (couleurTitres) s.couleur = couleurTitres; }
+    if (el.classList?.contains('st-titre')) { s.taille = 28 * o.taille / 11; if (couleurTitres) s.couleur = couleurTitres; }
+    if (el.classList?.contains('st-sous-titre')) { s.taille = 15 * o.taille / 11; s.couleur = [0.35, 0.35, 0.35]; }
     if (tag === 'SMALL' || tag === 'SUB' || tag === 'SUP') s.taille = s.taille * 0.8;
     const st = el.style || {};
     if (st.fontWeight && (st.fontWeight === 'bold' || +st.fontWeight >= 600)) s.gras = true; else if (st.fontWeight === 'normal' || (+st.fontWeight && +st.fontWeight < 600)) s.gras = false;
@@ -157,8 +165,9 @@ export async function htmlVersPdf(source, options = {}) {
       if (lignes.some(l => l.some(c => c.fusion > 1))) avert.add('Les cellules fusionnées des tableaux sont reproduites sans fusion.');
       if (lignes.length) blocs.push({ type: 'tableau', lignes, bordure: el.getAttribute('border') !== '0' && !/border:\s*(none|0)/.test(el.getAttribute('style') || ''), retrait });
     }
+    else if (tag === 'HR' && el.classList.contains('saut-page')) blocs.push({ type: 'saut' });
     else if (tag === 'HR') blocs.push({ type: 'filet', retrait });
-    else if (tag === 'IMG') blocs.push({ type: 'image', src: el.getAttribute('src'), largeur: +el.getAttribute('width') || el.naturalWidth || 0, hauteur: +el.getAttribute('height') || el.naturalHeight || 0, align: alignDe(el.parentElement || el) });
+    else if (tag === 'IMG') blocs.push({ type: 'image', src: el.getAttribute('src'), largeur: parseFloat(el.style?.width) || +el.getAttribute('width') || el.naturalWidth || 0, hauteur: (parseFloat(el.style?.width) ? 0 : (+el.getAttribute('height') || 0)) || (parseFloat(el.style?.width) ? 0 : el.naturalHeight) || 0, align: alignDe(el.parentElement || el) });
     else if (tag === 'BR') blocs.push({ type: 'texte', segments: [{ t: ' ', s }], align: 'gauche', retrait, apres: 0 });
     else if (estBloc(el) || el.childNodes.length) ajouterTexte(el, s, { retrait });
     if (sautApres(el)) blocs.push({ type: 'saut' });
@@ -292,8 +301,20 @@ export async function htmlVersPdf(source, options = {}) {
       if (ann) ann.push(ref); else l.page.node.set(L.PDFName.of('Annots'), pdf.context.obj([ref]));
     } catch { }
   }
+  // en-têtes, pieds de page ({page}, {pages}) et filigrane
+  const hf = o.entete || o.pied;
+  if (hf || o.filigrane) {
+    const fnt = await police(styleBase.fam, false, false), n = pdf.getPageCount();
+    const zone = (z, pg, i, yz) => { if (!z) return; for (const [k, v] of Object.entries(z)) { if (!v) continue; const t = nettoyerTexte(fnt, String(v).replace(/\{page\}/g, i + 1).replace(/\{pages\}/g, n).replace(/<[^>]+>/g, '')); const w = fnt.widthOfTextAtSize(t, 9); const x = k === 'centre' ? (largeurPage - w) / 2 : k === 'droite' ? largeurPage - o.marges.droite * MM - w : o.marges.gauche * MM; pg.drawText(t, { x, y: yz, size: 9, font: fnt, color: L.rgb(0.35, 0.35, 0.35) }); } };
+    pdf.getPages().forEach((pg, i) => {
+      if (o.filigrane) { const t = nettoyerTexte(fnt, o.filigrane), taille = Math.min(90, largeurPage * 1.1 / Math.max(1, t.length) * 1.6); pg.drawText(t, { x: largeurPage * 0.18, y: hauteurPage * 0.3, size: taille, font: fnt, color: L.rgb(0.85, 0.85, 0.85), rotate: L.degrees(45), opacity: 0.5 }); }
+      if (o.premierePageDifferente && i === 0) return;
+      zone(o.entete, pg, i, hauteurPage - o.marges.haut * MM / 2 - 3);
+      zone(o.pied, pg, i, o.marges.bas * MM / 2 - 3);
+    });
+  }
   // numéros de page
-  if (o.numeros) {
+  if (o.numeros && !hf) {
     const fnt = await police('sans', false, false); const n = pdf.getPageCount();
     pdf.getPages().forEach((p, i) => { const t = `${i + 1} / ${n}`; p.drawText(t, { x: (largeurPage - fnt.widthOfTextAtSize(t, 8.5)) / 2, y: o.marges.bas * MM - 4, size: 8.5, font: fnt, color: L.rgb(0.45, 0.45, 0.45) }); });
   }

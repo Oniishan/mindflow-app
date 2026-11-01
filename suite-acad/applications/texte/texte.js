@@ -7,6 +7,7 @@ import { nettoyer, sauverSelection, restaurerSelection, plageCourante, blocDe, b
 import { docxOctets, hash } from './docx.js';
 import { ecrireOdt, lireOdt } from './odt.js';
 import { MODELES } from './modeles.js';
+import { htmlVersPdf } from './commun/rendu-pdf.js';
 
 const feuille = $('#feuille'), espace = $('#espace'), echelleEl = $('#echelle'), pagesEl = $('#pages');
 const fondsEl = $('#fonds-pages'), calqueHF = $('#calque-hf'), stylePag = $('#pagination'), styleDoc = $('#style-doc'), styleImp = $('#style-impression');
@@ -996,6 +997,34 @@ function exporterHTML() {
   const css = `body{font-family:${D.police},Arial,sans-serif;font-size:${D.taille}pt;line-height:1.4;max-width:800px;margin:40px auto;padding:0 20px;color:#1b1b1b}h1,h2,h3{color:#${D.couleurTitres}}table{border-collapse:collapse;width:100%}td,th{border:1px solid #808080;padding:4px 6px;vertical-align:top}img{max-width:100%}.st-titre{font-size:28pt;color:#${D.couleurTitres}}.st-sous-titre{font-size:15pt;color:#595959}blockquote{font-style:italic;border-left:3px solid #ccc;padding-left:12px}hr.saut-page{border:0;page-break-after:always}.entree-sommaire{display:flex;gap:4px}.entree-sommaire .points{flex:1;border-bottom:1px dotted #888}.commentaire{background:#FFF3B0}`;
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${esc(nomSansExtension(doc.nom))}</title><style>${css}</style></head><body>${clone.innerHTML}</body></html>`;
 }
+/** Export PDF déterministe (rendu commun Suite Acad’) : le fichier n'est proposé à l'enregistrement que s'il est valide. */
+async function texteVersPdf() {
+  const clone = feuille.cloneNode(true);
+  clone.querySelectorAll('[contenteditable]').forEach(n => n.removeAttribute('contenteditable'));
+  clone.querySelectorAll('.img-sel').forEach(i => i.classList.remove('img-sel'));
+  const p = D.page, enMm = v => v / MM;
+  const vide = t => !t || !Object.values(t).some(Boolean);
+  return htmlVersPdf(clone, {
+    format: Object.keys(FORMATS_PAGE).find(k => k === p.format) ? (p.format === 'Lettre' ? 'Letter' : p.format) : 'A4', paysage: !!p.paysage,
+    marges: { haut: enMm(p.marges.haut), bas: enMm(p.marges.bas), gauche: enMm(p.marges.gauche), droite: enMm(p.marges.droite) },
+    police: /times|georgia|garamond|cambria|book|serif/i.test(D.police) && !/sans/i.test(D.police) ? 'serif' : 'sans', taille: D.taille, couleurTitres: D.couleurTitres,
+    entete: vide(D.entete) ? null : D.entete, pied: vide(D.pied) ? null : D.pied, premierePageDifferente: D.premierePageDifferente, filigrane: D.filigrane || '',
+    numeros: vide(D.entete) && vide(D.pied) ? false : true, titre: nomSansExtension(doc.nom), auteur: utilisateur(),
+  });
+}
+async function exporterPdf() {
+  let r;
+  try { r = await texteVersPdf(); } catch (e) { toast('Export PDF impossible : ' + (e.message || e), 'erreur'); return; }
+  if (r.vide) { toast('Le document ne contient aucun texte : aucun PDF n\'a été créé.', 'erreur'); return; }
+  if (r.avertissements.length) {
+    const ok = await dialogue({ titre: 'Export PDF : différences avec l\'écran', contenu: `<p>Le PDF (${r.pages} page${r.pages > 1 ? 's' : ''}) est prêt. Quelques éléments ne sont pas reproduits à l'identique :</p><ul>${r.avertissements.map(a => `<li>${esc(a)}</li>`).join('')}</ul>`, boutons: [{ label: 'Annuler', valeur: null }, { label: 'Enregistrer le PDF', valeur: true, primaire: true, id: 'enregistrer-pdf' }] });
+    if (!ok) return;
+  }
+  try {
+    const res = await doc.ecrireSur(null, r.octets, { nomSuggere: nomSansExtension(doc.nom), filtres: [{ nom: 'Document PDF', ext: ['pdf'] }] });
+    if (res) toast(`PDF enregistré : ${res.nom} (${r.pages} page${r.pages > 1 ? 's' : ''}, relu et vérifié). Le document d'origine n'est pas modifié.`, 'succes');
+  } catch (e) { toast('Enregistrement du PDF impossible : ' + (e.message || e), 'erreur'); }
+}
 function versTexte() { return feuille.innerText.replace(/ /g, ' '); }
 function versMarkdown() {
   const md = n => {
@@ -1050,7 +1079,8 @@ const doc = creerDocument({
   formatsOuverture: [{ nom: 'Documents Word', ext: ['docx'] }, { nom: 'Documents OpenDocument', ext: ['odt'] }, { nom: 'Pages web', ext: ['html', 'htm'] }, { nom: 'Texte', ext: ['txt'] }, { nom: 'Markdown', ext: ['md'] }],
   formatsEnregistrement: [{ nom: 'Document Word', ext: 'docx', ecrire: ecrireDocxActuel }, { nom: 'Document OpenDocument', ext: 'odt', ecrire: async () => ecrireOdt({ feuille: feuille.cloneNode(true), reglages: { ...D, largeurContenu: largeurContenu() }, titre: nomSansExtension(doc.nom) }) }],
   exports: [
-    { id: 'pdf', label: 'PDF', ico: 'file-type', desc: 'Ouvre l\'impression : choisissez « Microsoft Print to PDF » ou « Enregistrer au format PDF ».', faire: () => doc.imprimer() },
+    { id: 'pdf', label: 'PDF (.pdf)', ico: 'file-type', desc: 'Fichier PDF produit directement, avec une mise en page prévisible : format, marges, en-têtes et pieds de page du document.', faire: () => exporterPdf() },
+    { id: 'impression', label: 'Imprimer ou PDF via l\'impression', ico: 'printer', desc: 'Ouvre l\'impression de Windows (« Microsoft Print to PDF ») : rendu dépendant de l\'imprimante choisie.', faire: () => doc.imprimer() },
     { id: 'docx', label: 'Document Word (.docx)', ico: 'file-text', ext: 'docx', ecrire: ecrireDocxActuel, desc: 'Compatible Microsoft Word et LibreOffice.' },
     { id: 'odt', label: 'Document OpenDocument (.odt)', ico: 'file-text', ext: 'odt', desc: 'Format ouvert, compatible LibreOffice Writer.', ecrire: async () => ecrireOdt({ feuille: feuille.cloneNode(true), reglages: { ...D, largeurContenu: largeurContenu() }, titre: nomSansExtension(doc.nom) }) },
     { id: 'html', label: 'Page web (.html)', ico: 'globe', ext: 'html', desc: 'Pour publier sur un intranet ou un wiki.', ecrire: async () => exporterHTML() },
@@ -1084,7 +1114,7 @@ const doc = creerDocument({
   commandes: () => ruban.commandes(),
   imprimer: () => { selectionnerImage(null); setTimeout(() => window.print(), 50); },
 });
-window.__texte = { feuille, D: () => D, V, doc, paginerMaintenant, exporterHTML, versMarkdown, versTexte, ecrireDocxActuel, chargerHTML };
+window.__texte = { texteVersPdf, exporterPdf, feuille, D: () => D, V, doc, paginerMaintenant, exporterHTML, versMarkdown, versTexte, ecrireDocxActuel, chargerHTML };
 
 // ---------- Démarrage ----------
 (async () => {
