@@ -99,3 +99,46 @@ s.insert_button('D2', {'macro': 'Bonjour', 'caption': 'Dire bonjour'})  # bouton
 w.close()
 os.remove(p('vbaProject.bin'))
 print('\n'.join(sorted(os.listdir(D))))
+
+# ---------- Publipostage ----------
+import datetime, docx
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
+wb = openpyxl.Workbook(); ws = wb.active; ws.title = 'Inscrits'
+ws.append(['Nom', 'Prénom', 'Courriel', 'Montant', 'Date de naissance', 'Ville'])
+donnees = [
+    ('Martin', 'Léa', 'lea.martin@exemple.fr', 125.5, datetime.date(2010, 3, 14), 'Grenoble'),
+    ('Durand/Dupont', 'Hugo', 'hugo.durand@exemple.fr', 80, datetime.date(2011, 7, 2), 'Échirolles'),
+    ('Bernard', None, 'famille.bernard@exemple.fr', 42, datetime.date(2009, 12, 31), 'Voiron'),
+    ('Petit', 'Zoé', 'lea.martin@exemple.fr', 10, datetime.date(2012, 1, 5), 'Meylan'),
+    ('Robert', 'Noé', 'adresse-invalide', 99.99, datetime.date(2010, 9, 9), 'Grenoble'),
+    ('CON', 'Inès', 'ines.con@exemple.fr', 0, datetime.date(2011, 4, 1), 'Fontaine'),
+]
+for d in donnees: ws.append(list(d))
+for r in range(2, len(donnees) + 2): ws.cell(row=r, column=5).number_format = 'dd/mm/yyyy'; ws.cell(row=r, column=4).number_format = '#,##0.00 "€"'
+ws.append([None] * 6)  # ligne vide
+wb.save(p('destinataires.xlsx'))
+with open(p('destinataires.csv'), 'w', encoding='cp1252', newline='') as f:
+    f.write('Nom;Prénom;Courriel\r\nMartin;Léa;lea.martin@exemple.fr\r\nÉlodie;Garçon;e.garcon@exemple.fr\r\n')
+
+d = docx.Document()
+d.sections[0].header.paragraphs[0].text = 'Dossier de {Nom}'
+d.add_heading('Confirmation d\'inscription', 1)
+par = d.add_paragraph()
+for morceau in ['Bonjour {Pré', 'nom|Madame, ', 'Monsieur} ', '{Nom}', ',']:  # balise éclatée sur plusieurs morceaux
+    par.add_run(morceau)
+par2 = d.add_paragraph('Montant dû : ')
+# champ de fusion Word complexe : MERGEFIELD Montant
+for typ, txt in [('begin', None), (None, ' MERGEFIELD Montant \\* MERGEFORMAT '), ('separate', None), (None, '«Montant»'), ('end', None)]:
+    r = par2.add_run()
+    if typ:
+        fc = OxmlElement('w:fldChar'); fc.set(qn('w:fldCharType'), typ); r._r.append(fc)
+    elif 'MERGEFIELD' in txt:
+        it = OxmlElement('w:instrText'); it.set(qn('xml:space'), 'preserve'); it.text = txt; r._r.append(it)
+    else: r.text = txt
+d.add_paragraph('Né(e) le «Date de naissance» à {Ville}. Document n° {#}.')
+t = d.add_table(rows=2, cols=2); t.style = 'Table Grid'
+t.cell(0, 0).text = 'Courriel'; t.cell(0, 1).text = '{Courriel}'; t.cell(1, 0).text = 'Observation'; t.cell(1, 1).text = '{Observation|Aucune}'
+d.add_paragraph('Signature : le secrétariat — {Champ inconnu}')
+d.save(p('modele-inscription.docx'))
+print('publipostage : ok')

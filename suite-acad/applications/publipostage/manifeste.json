@@ -1,0 +1,39 @@
+{
+  "id": "publipostage",
+  "version": "1.2.0",
+  "nom": "Publipostage",
+  "slogan": "Un document personnalisé par destinataire",
+  "inspire": "Publipostage, Mail Merge",
+  "categorie": "nouvelle",
+  "ordre": 6,
+  "couleur": "#6B4E9B",
+  "lettre": "PJ",
+  "iconeRessource": 8,
+  "description": "Produit un document par ligne d'un tableau Excel, OpenDocument ou CSV à partir d'un modèle Word ou d'un texte : champs {Colonne} avec valeur par défaut, aperçu par destinataire, contrôle des valeurs manquantes et des doublons, documents Word ou PDF aux noms de fichiers sûrs, et liste d'envoi prête pour Fusion PJ dans Thunderbird. Tout se fait sur le poste : aucun fichier n'est envoyé sur Internet.",
+  "formats": [
+    {
+      "ext": "docx",
+      "description": "Modèle Word"
+    }
+  ],
+  "fonctionnalites": [
+    "Données : Excel (.xlsx, .xlsm, .xls), OpenDocument (.ods), CSV",
+    "Modèle Word (.docx, .dotx, .docm) : {Colonne}, «Colonne» ou champs de fusion Word",
+    "Modèle texte rédigé directement, avec insertion de champs",
+    "Valeur par défaut : {Prénom|Madame, Monsieur}",
+    "Aperçu par destinataire, valeurs surlignées, manques signalés",
+    "Contrôle : champs sans colonne, valeurs manquantes, doublons, adresses invalides",
+    "Un Word par ligne, un seul Word, un PDF par ligne ou un seul PDF",
+    "Noms de fichiers sûrs et sans écrasement, choix du dossier",
+    "Liste d'envoi CSV pour Fusion PJ (adresse + fichier à joindre)",
+    "Résumé détaillé : documents produits, vérifiés, erreurs"
+  ],
+  "captures": [],
+  "versions": [
+    {
+      "version": "1.2.0",
+      "date": "2026-11-01",
+      "notes": "Première version : fusion d'un tableau (Excel, ODS, CSV) avec un modèle Word ou texte, aperçu par destinataire, contrôles (champs sans colonne, valeurs manquantes, doublons, adresses), génération de documents Word ou PDF vérifiés, noms de fichiers sûrs, liste d'envoi pour Fusion PJ."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Publipostage</title>
+<link rel="stylesheet" href="commun/atelier.css">
+<link rel="stylesheet" href="publipostage.css">
+<script src="commun/vendor/mammoth.min.js"></script>
+<script src="commun/vendor/pdf-lib.min.js"></script>
+</head>
+<body data-app="publipostage">
+<div class="appli">
+  <div class="barre-titre" id="barre-titre"></div>
+  <nav class="etapes-pp" id="etapes" aria-label="Étapes">
+    <button data-etape="1"><b>1</b><span>Données</span><small id="r1">à choisir</small></button>
+    <button data-etape="2"><b>2</b><span>Modèle</span><small id="r2">à choisir</small></button>
+    <button data-etape="3"><b>3</b><span>Contrôle et aperçu</span><small id="r3"></small></button>
+    <button data-etape="4"><b>4</b><span>Génération</span><small id="r4"></small></button>
+  </nav>
+  <main class="zone-pp" id="zone">
+    <section class="etape-pp" id="e1" aria-labelledby="t1"></section>
+    <section class="etape-pp masque" id="e2" aria-labelledby="t2"></section>
+    <section class="etape-pp masque" id="e3" aria-labelledby="t3"></section>
+    <section class="etape-pp masque" id="e4" aria-labelledby="t4"></section>
+  </main>
+  <footer class="pied-pp"><button class="btn" id="precedent"></button><span class="espace" style="flex:1"></span><span id="confidentialite" class="note-pp"></span><button class="btn primaire" id="suivant"></button></footer>
+</div>
+<script type="module" src="publipostage.js"></script>
+</body>
+</html>
