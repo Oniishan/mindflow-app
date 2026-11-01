@@ -2,33 +2,31 @@
   "id": "depannage",
   "version": "1.2.0",
   "nom": "Dépannage",
-  "slogan": "Débloquer et réparer Excel et les classeurs",
+  "slogan": "Dépannage de Calcul et des classeurs",
   "inspire": "",
   "categorie": "outil",
   "ordre": 20,
   "couleur": "#5B6B2E",
   "lettre": "Dp",
   "iconeRessource": 7,
-  "description": "Remet en état les classeurs qui ne s'ouvrent plus, refusent le copier-coller ou se disent « déjà utilisés », et corrige les dysfonctionnements d'Excel sur le poste : presse-papiers bloqué, Excel invisibles, compléments défaillants. Une sauvegarde est faite avant chaque correction, annulable à tout moment.",
+  "description": "Diagnostique sans rien modifier les classeurs qui ne s'ouvrent plus dans Calcul ou dans Excel, refusent le copier-coller ou se disent « déjà utilisés », puis les répare après les avoir copiés dans l'historique des versions de Calcul. Chaque réparation est contrôlée en relisant le fichier obtenu. Les interventions sur Excel et Windows (presse-papiers, Excel invisibles, compléments) sont séparées, facultatives et confirmées une par une.",
   "formats": [],
   "fonctionnalites": [
-    "Débloque les fichiers venus d'Internet ou d'un courriel",
-    "Supprime les verrous « déjà utilisé par un autre utilisateur »",
-    "Nettoie les styles et formats qui empêchent de coller",
-    "Supprime les noms en erreur (#REF!)",
-    "Lève les protections de feuille et de classeur",
-    "Répare les classeurs endommagés avec Excel",
-    "Convertit les anciens .xls",
-    "Rompt les liaisons vers d'autres classeurs",
-    "Libère le presse-papiers et ferme les Excel invisibles",
+    "Diagnostic non destructif : lisibilité par Calcul, archive, macros, liaisons",
+    "Verrous « déjà utilisé », styles accumulés, noms en erreur, protections",
+    "Plan de réparation : ce qui a été détecté et ce qui sera tenté",
+    "Copie dans l'historique des versions de Calcul avant chaque réparation",
+    "Contrôle du fichier obtenu ; version d'origine remise en place s'il ne se relit plus",
+    "Interventions facultatives avec Excel (réparation, conversion .xls), confirmées",
+    "Interventions facultatives sur Windows et Excel (presse-papiers, Excel invisibles, compléments)",
     "Historique des corrections, annulables"
   ],
   "captures": [],
   "versions": [
     {
       "version": "1.2.0",
-      "date": "2026-10-31",
-      "notes": "Enregistrement sûr commun à la suite : le document produit n'est jamais vide, le fichier écrit est relu et comparé (SHA-256) après l'écriture atomique."
+      "date": "2026-11-01",
+      "notes": "Dépannage réorienté vers Calcul et les classeurs : diagnostic non destructif (contrôles de lecture par Calcul en plus de l'analyse du moteur), plan de réparation explicite, copie dans l'historique des versions avant réparation, contrôle réel du résultat (relecture, nouvelle analyse, remise en place automatique si le fichier n'est plus lisible). Les actions qui lancent Excel ou modifient Windows sont séparées, facultatives et confirmées ; elles ne sont plus déclenchées par la réparation automatique."
     }
   ]
 }

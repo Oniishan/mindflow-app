@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dépannage</title>
+<title>Dépannage de Calcul et des classeurs</title>
 <link rel="stylesheet" href="commun/atelier.css">
 <link rel="stylesheet" href="depannage.css">
 </head>
@@ -13,37 +13,44 @@
   <main class="depannage" id="zone">
     <section class="bandeau-auto" aria-labelledby="titre-auto">
       <div class="texte-auto">
-        <h1 id="titre-auto">Réparer Excel et les classeurs qui posent problème</h1>
-        <p>Ajoutez les classeurs concernés puis lancez la correction automatique : fichiers bloqués, verrous, styles accumulés qui empêchent de coller, Excel invisibles et presse-papiers bloqué. Chaque fichier est sauvegardé avant d'être modifié.</p>
+        <h1 id="titre-auto">Dépannage de Calcul et des classeurs</h1>
+        <ol class="etapes">
+          <li><b>Diagnostic</b> — ajoutez les classeurs : ils sont lus et analysés <b>sans être modifiés</b>.</li>
+          <li><b>Réparation</b> — vous voyez ce qui a été détecté et ce qui sera tenté ; une copie est placée dans l'historique des versions avant toute modification.</li>
+          <li><b>Contrôle</b> — le fichier obtenu est relu et analysé de nouveau : une réparation n'est annoncée réussie que si le contrôle le confirme.</li>
+        </ol>
       </div>
       <button class="btn primaire grand" id="tout-corriger"></button>
     </section>
-    <div class="resultat-auto masque" id="resultat-auto" role="status"></div>
-    <div class="colonnes">
-      <section class="panneau" aria-labelledby="titre-classeurs">
-        <header class="tete-panneau">
-          <h2 id="titre-classeurs">Classeurs</h2>
-          <div class="outils-panneau">
-            <button class="btn" id="ajouter-fichiers"></button>
-            <button class="btn" id="ajouter-dossier"></button>
-            <button class="btn discret icone masque" id="vider" aria-label="Retirer tous les classeurs de la liste" title="Retirer tous les classeurs de la liste"></button>
-          </div>
-        </header>
-        <div id="liste-fichiers" class="liste-fichiers"></div>
-      </section>
-      <section class="panneau" aria-labelledby="titre-poste">
-        <header class="tete-panneau">
-          <h2 id="titre-poste">Excel sur ce poste</h2>
-          <div class="outils-panneau"><button class="btn discret icone" id="reanalyser-poste" aria-label="Vérifier de nouveau" title="Vérifier de nouveau"></button></div>
-        </header>
-        <div id="liste-poste" class="liste-poste"></div>
-      </section>
-    </div>
+    <div class="resultat-auto masque" id="resultat-auto" role="status" aria-live="polite"></div>
+    <section class="panneau" aria-labelledby="titre-classeurs">
+      <header class="tete-panneau">
+        <h2 id="titre-classeurs">Classeurs <small class="sous-titre">vérifications et réparations propres à Calcul et à Suite Acad’</small></h2>
+        <div class="outils-panneau">
+          <button class="btn" id="ajouter-fichiers"></button>
+          <button class="btn" id="ajouter-dossier"></button>
+          <button class="btn discret icone masque" id="vider" aria-label="Retirer tous les classeurs de la liste" title="Retirer tous les classeurs de la liste"></button>
+        </div>
+      </header>
+      <div id="liste-fichiers" class="liste-fichiers"></div>
+    </section>
+    <details class="panneau facultatif" id="bloc-poste">
+      <summary class="tete-panneau">
+        <h2 id="titre-poste">Interventions facultatives sur Excel et Windows <small class="sous-titre">n'agissent pas sur vos classeurs</small></h2>
+        <span class="etat info" id="resume-poste">Non vérifié</span>
+      </summary>
+      <div class="avertissement-poste">
+        <p>Ces vérifications concernent Microsoft Excel et Windows sur ce poste (presse-papiers, Excel restés ouverts en arrière-plan, compléments, réglages). Elles ne sont utiles que si le problème se produit <b>dans Excel</b>. Certaines actions ferment des processus ou modifient des réglages : chacune vous est expliquée et demande votre confirmation. Calcul n'en a pas besoin pour fonctionner.</p>
+        <button class="btn discret" id="reanalyser-poste"></button>
+      </div>
+      <div id="liste-poste" class="liste-poste"></div>
+    </details>
     <section class="panneau historique" aria-labelledby="titre-historique">
       <header class="tete-panneau">
         <h2 id="titre-historique">Historique des corrections</h2>
         <div class="outils-panneau"><button class="btn discret" id="ouvrir-sauvegardes"></button></div>
       </header>
+      <p class="note-historique">Chaque classeur est aussi copié dans l'<b>historique des versions de Calcul</b> avant réparation (menu Fichier &gt; Historique des versions de Calcul).</p>
       <div id="liste-historique"></div>
     </section>
   </main>

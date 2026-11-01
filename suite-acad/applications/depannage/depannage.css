@@ -65,3 +65,31 @@
 .historique .entree.annule .quoi{text-decoration:line-through;color:var(--encre-3)}
 .tourne{animation:tourne 1s linear infinite}
 @keyframes tourne{to{transform:rotate(360deg)}}
+/* ---- 1.2.0 : diagnostic / réparation / contrôle ---- */
+.etapes{margin:6px 0 0;padding-left:20px;color:var(--encre-2);max-width:90ch}
+.etapes li{margin:3px 0}
+.sous-titre{font-weight:400;color:var(--encre-3);font-size:12.5px;margin-left:6px}
+.detail-fichier h4{display:flex;align-items:center;gap:6px;margin:14px 0 2px;font-size:13px;color:var(--encre-2)}
+.detail-fichier h4 small{font-weight:400;color:var(--encre-3)}
+.detail-fichier h4.titre-excel{color:var(--alerte)}
+.ligne-fichier .etat .ico{width:13px;height:13px}
+.facultatif>summary{cursor:pointer;list-style:none}
+.facultatif>summary::-webkit-details-marker{display:none}
+.facultatif>summary::before{content:'▸';color:var(--encre-3);margin-right:2px}
+.facultatif[open]>summary::before{content:'▾'}
+.avertissement-poste{display:flex;gap:14px;align-items:flex-start;padding:12px 14px;background:var(--alerte-doux);border-bottom:1px solid var(--ligne)}
+.avertissement-poste p{margin:0;flex:1;max-width:100ch}
+.pastille-v{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none;background:var(--encre-3)}
+.pastille-v.ok{background:var(--succes)}.pastille-v.erreur{background:var(--danger)}.pastille-v.alerte{background:#C98A00}
+.note-historique{margin:0;padding:8px 14px;color:var(--encre-2);font-size:13px;border-bottom:1px solid var(--ligne)}
+.plan-fichier{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;padding:10px 0;border-bottom:1px solid var(--ligne)}
+.plan-fichier>b{grid-column:1/-1}
+.plan-col span{font-size:12px;font-weight:600;color:var(--encre-3);text-transform:uppercase;letter-spacing:.04em}
+.plan-col ul{margin:4px 0 0;padding-left:18px}
+.plan-avert{display:flex;gap:10px;margin:12px 0;padding:10px 12px;border-radius:8px;background:var(--alerte-doux);color:var(--encre)}
+.plan-avert p{margin:0 0 4px}
+.rapport-fichier{padding:8px 0;border-top:1px solid var(--ligne)}
+.rapport-fichier small{color:var(--encre-3)}
+.rapport-fichier ul{list-style:none;padding:0;margin:6px 0 0}
+.rapport-fichier li{display:flex;gap:8px;align-items:baseline;margin:4px 0}
+.rapport-fichier li .etat{min-width:92px;justify-content:center}
