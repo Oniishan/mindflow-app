@@ -13,3 +13,10 @@ Ce dépôt intègre [ECC](https://github.com/affaan-m/ECC) :
   projet HTML/CSS/JS.
 
 Ne pas lancer `./install.sh --profile full` d'ECC en plus du plugin (doublons).
+
+## TheAgency (intégration légère)
+
+Sélection de skills/commandes de [TheAgency](https://github.com/the-agency-ai/the-agency)
+dans `.claude/skills/` et `.claude/commands/` — détail dans `.claude/vendor/the-agency/README.md`.
+Workflow conseillé : `/define` (besoin) → `/design` (architecture) → implémentation, avec
+`/discuss` pour trancher les points un par un. Les documents produits vont dans `docs/`.
