@@ -1,0 +1,7 @@
+Dépôt de mises à jour de la suite Suite Acad’
+
+Indiquez ce dossier dans Réglages > Mises à jour > Source des mises à jour,
+ou dans politique.json (champ sourceMaj) pour l'imposer à tous les postes.
+
+Pour publier une nouvelle version : remplacez l'archive dans applications\ et mettez à jour
+la version, la taille et la somme SHA-256 correspondantes dans catalogue.json.
