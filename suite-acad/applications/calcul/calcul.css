@@ -107,3 +107,7 @@
   .zone-impression h2{font:600 11pt Arial,sans-serif;margin:0 0 6px}
   .zone-impression .saut{break-before:page}
 }
+/* Barre d'information : macros VBA et compatibilité */
+.barre-message{display:flex;align-items:center;gap:10px;padding:6px 12px;background:var(--alerte-doux);border-bottom:1px solid var(--ligne);font-size:13px;color:var(--encre)}
+.barre-message>span{flex:1;min-width:0}
+.barre-message .ico{flex:none;color:var(--alerte)}

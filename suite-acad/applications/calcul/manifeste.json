@@ -16,6 +16,10 @@
       "description": "Classeur Excel"
     },
     {
+      "ext": "xlsm",
+      "description": "Classeur Excel avec macros (macros conservées, non exécutées)"
+    },
+    {
       "ext": "ods",
       "description": "Classeur OpenDocument"
     },
@@ -35,14 +39,15 @@
     "Plusieurs feuilles, références entre feuilles",
     "Ouvre et enregistre Excel (.xlsx), OpenDocument (.ods) et CSV",
     "Modèles : budget, inventaire, suivi, notes de frais, planning",
-    "Historique des versions : copie vérifiée avant chaque enregistrement, restauration en deux clics"
+    "Historique des versions : copie vérifiée avant chaque enregistrement, restauration en deux clics",
+    "Classeurs avec macros (.xlsm) : projet VBA conservé à l'identique et vérifié, jamais exécuté"
   ],
   "captures": [],
   "versions": [
     {
       "version": "1.2.0",
       "date": "2026-10-31",
-      "notes": "Historique des versions des classeurs : point de restauration vérifié (SHA-256) avant chaque enregistrement, restauration ou réparation, conservation 30 jours réglable, restauration en deux clics avec copie préalable du fichier remplacé, restauration sous un nouveau nom. Enregistrement sûr : le classeur produit est relu avant écriture et le fichier écrit est relu et comparé."
+      "notes": "Historique des versions des classeurs : point de restauration vérifié (SHA-256) avant chaque enregistrement, restauration ou réparation, conservation 30 jours réglable, restauration en deux clics avec copie préalable du fichier remplacé, restauration sous un nouveau nom. Enregistrement sûr : le classeur produit est relu avant écriture et le fichier écrit est relu et comparé. Classeurs avec macros : enregistrement .xlsm qui conserve le projet VBA octet pour octet (vérifié après écriture), avertissement avant tout enregistrement qui supprimerait les macros ou des éléments non pris en charge, liste des modules VBA, moteur de calcul et fonctions non prises en charge indiqués ; les macros ne sont jamais exécutées."
     }
   ]
 }

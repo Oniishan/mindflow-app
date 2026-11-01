@@ -8,6 +8,7 @@ import { nouveauClasseur, nouvelleFeuille, cle, deCle, etendue, COLS_MAX, LIGNES
 import { ecrireXlsx, lireClasseur, ecrireOds, ecrireCSV } from './xlsx.js';
 import { rendreGraphique, donneesGraphique, TYPES_GRAPHIQUES, svgVersPng } from './graphiques.js';
 import { MODELES } from './modeles.js';
+import { analyserOrigine, injecterVba, verifierVba } from './macros.js';
 
 const zone = $('#zone-grille'), defile = $('#defile'), contenu = $('#contenu'), calque = $('#calque-cellules');
 const EC = 24, EL = 46; // hauteur des en-têtes de colonnes, largeur des en-têtes de lignes
@@ -1383,6 +1384,74 @@ function chargerClasseur(c) {
   S.r = S.c = S.r1 = S.c1 = S.r2 = S.c2 = 0;
   toutRecalculer(); selectionner(0, 0);
 }
+// ---------- Macros VBA et éléments non pris en charge (classeurs venus d'Excel) ----------
+let ORIGINE = null; // analyse du fichier ouvert : projet VBA, noms de code, éléments non conservés
+const pertesAcceptees = new Set();
+async function ecrireXlsmActuel() {
+  const o = injecterVba(await ecrireXlsxActuel(), ORIGINE, C.feuilles.map(f => f.nom));
+  const v = verifierVba(o, ORIGINE);
+  if (!v.ok) throw new Error(`enregistrement .xlsm bloqué pour protéger les macros (${v.detail}) : rien n'a été écrit`);
+  return o;
+}
+/** Fonctions utilisées par le classeur et inconnues de Calcul (les cellules affichent #NOM?, la formule est conservée). */
+function fonctionsNonPrisesEnCharge() {
+  const inconnues = new Map();
+  for (const f of C.feuilles) for (const c of f.cellules.values()) {
+    if (!c.f) continue;
+    for (const m of c.f.replace(/"[^"]*"/g, '').matchAll(/([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9._]*)\s*\(/g)) {
+      const n = m[1].toUpperCase().replace(/^_XLFN\.|^_XLWS\./, '');
+      if (!FONCTIONS[n]) inconnues.set(n, (inconnues.get(n) || 0) + 1);
+    }
+  }
+  return [...inconnues].map(([nom, n]) => ({ nom, n }));
+}
+const listeModules = v => v.projet.lisible ? v.projet.modules.map(m => m.nom).join(', ') || 'aucun module listé' : 'liste des modules non lisible';
+function afficherBarreMacros() {
+  document.querySelector('#barre-macros')?.remove();
+  const inconnues = fonctionsNonPrisesEnCharge();
+  const v = ORIGINE?.vba;
+  if (!v && !inconnues.length) return;
+  const b = el(`<div class="barre-message" id="barre-macros" role="status">${ico('shield-check', 'p')}<span>${v ? `<b>Macros VBA présentes, non exécutées.</b> ${v.projet.lisible ? `${v.projet.modules.length} module(s) : ${esc(listeModules(v))}.` : ''} Calcul les conserve à l'identique en enregistrant au format .xlsm ; il ne les exécute jamais.` : ''}
+    ${inconnues.length ? `<b>${inconnues.length} fonction(s) non prise(s) en charge</b> : ${esc(inconnues.map(x => x.nom).join(', '))} — ces cellules affichent #NOM? ; la formule d'origine est conservée.` : ''}</span>
+    <button class="btn petit" data-a="details">Détails</button>${v ? `<button class="btn petit" data-a="excel">Ouvrir avec Excel…</button>` : ''}<button class="btn discret icone petit" data-a="fermer" aria-label="Masquer">${ico('x', 'p')}</button></div>`);
+  $('#zone-ruban').after(b);
+  $('[data-a="fermer"]', b).onclick = () => b.remove();
+  $('[data-a="details"]', b).onclick = () => detailsMacros();
+  const be = $('[data-a="excel"]', b); if (be) be.onclick = () => doc.ouvrirCoulisses('externe');
+}
+function detailsMacros() {
+  const v = ORIGINE?.vba, inconnues = fonctionsNonPrisesEnCharge();
+  dialogue({ titre: 'Macros et compatibilité Excel', taille: 'large', boutons: [{ label: 'Fermer', valeur: true, primaire: true }], contenu: `
+    <p><b>Moteur utilisé :</b> moteur de calcul de Calcul (JavaScript intégré à Suite Acad’, formules en français) ; lecture des fichiers Excel avec SheetJS. Calcul <b>n'est pas</b> Microsoft Excel : les résultats sont identiques pour les fonctions prises en charge, mais l'équivalence complète n'est pas garantie.</p>
+    ${v ? `<h3>Projet VBA</h3><ul>
+      <li>${v.projet.lisible ? `Modules : ${v.projet.modules.map(m => `${esc(m.nom)} <small>(${esc(m.type)})</small>`).join(', ') || 'aucun'}` : `Contenu non analysé (${esc(v.projet.detail || 'format inconnu')}) — le projet est tout de même conservé à l'identique.`}</li>
+      ${v.projet.protege ? '<li>Projet protégé par mot de passe (le mot de passe est conservé).</li>' : ''}
+      ${v.signe ? '<li>Projet signé numériquement : la signature est conservée telle quelle ; Excel vérifie sa validité à l\'ouverture.</li>' : ''}
+      <li><b>Exécution :</b> aucune. Calcul ne contient pas d'interpréteur VBA et n'active jamais de macros. Les boutons, formulaires et automatismes qui en dépendent ne fonctionnent pas ici.</li>
+      <li><b>Conservation :</b> en enregistrant au format .xlsm, le projet VBA est recopié octet pour octet et vérifié après écriture ; si la vérification échoue, rien n'est écrit. Enregistrer en .xlsx, .ods ou .csv supprime les macros (un avertissement est affiché).</li>
+      <li><b>Pour exécuter les macros :</b> ouvrez le classeur dans Microsoft Excel (bouton « Ouvrir avec Excel… »). Excel applique alors ses propres règles de sécurité (macros désactivées pour les fichiers venus d'Internet, emplacements approuvés).</li></ul>` : ''}
+    ${ORIGINE?.pertes?.length ? `<h3>Éléments du fichier d'origine que Calcul ne réécrit pas</h3><ul>${ORIGINE.pertes.map(p => `<li>${esc(p.libelle)} (${p.n})</li>`).join('')}</ul><p>Ils seront absents du fichier enregistré par Calcul. Le fichier d'origine reste disponible dans l'historique des versions.</p>` : ''}
+    ${inconnues.length ? `<h3>Fonctions non prises en charge</h3><ul>${inconnues.map(x => `<li>${esc(x.nom)} — ${x.n} formule(s)</li>`).join('')}</ul><p>Les cellules concernées affichent #NOM? dans Calcul ; la formule est réécrite telle quelle à l'enregistrement et Excel la recalculera.</p>` : ''}` });
+}
+/** Avant d'écrire : macros qui seraient perdues, éléments non conservés. Renvoie false pour annuler. */
+async function avantEnregistrementCalcul({ fmt, chemin }) {
+  const v = ORIGINE?.vba;
+  if (v && fmt.ext !== 'xlsm') {
+    const r = await dialogue({ titre: 'Les macros seraient supprimées', contenu: `<p>Ce classeur contient des macros VBA${v.projet.lisible && v.projet.modules.length ? ` (${esc(listeModules(v))})` : ''}. Le format .${esc(fmt.ext)} ne peut pas les contenir : le fichier enregistré en serait dépourvu.</p><p>Le format .xlsm les conserve à l'identique.</p>`,
+      boutons: [{ label: 'Annuler', valeur: null }, { label: 'Enregistrer sans les macros', valeur: 'sans', id: 'sans-macros', danger: true }, { label: 'Enregistrer en .xlsm', valeur: 'xlsm', primaire: true, id: 'en-xlsm' }] });
+    if (!r) return false;
+    if (r.valeur === 'xlsm') { setTimeout(() => doc.enregistrerSous('xlsm'), 0); return false; }
+  }
+  const cle = (chemin || '') + '|' + fmt.ext;
+  if ((fmt.ext === 'xlsx' || fmt.ext === 'xlsm') && ORIGINE?.pertes?.length && !pertesAcceptees.has(cle)) {
+    const r = await dialogue({ titre: 'Éléments non conservés', contenu: `<p>Calcul conservera les données, formules, mises en forme${v && fmt.ext === 'xlsm' ? ' et les macros VBA (à l\'identique)' : ''}, mais <b>pas</b> :</p><ul>${ORIGINE.pertes.map(p => `<li>${esc(p.libelle)}</li>`).join('')}</ul><p>${chemin ? 'Avant d\'être remplacé, le fichier actuel est copié dans l\'historique des versions.' : 'Le fichier d\'origine n\'est pas modifié.'}</p>`,
+      boutons: [{ label: 'Annuler', valeur: null }, { label: 'Enregistrer quand même', valeur: true, primaire: true, id: 'accepter-pertes' }] });
+    if (!r) return false;
+    pertesAcceptees.add(cle);
+  }
+  return true;
+}
+
 /** Contrôle qu'un fichier de classeur se relit (utilisé avant écriture, pour l'historique et la restauration). */
 async function verifierClasseur(octets, ext) {
   try {
@@ -1396,10 +1465,11 @@ const doc = creerDocument({
   focus: () => $('#recepteur').focus({ preventScroll: true }),
   app: 'calcul', nomApp: 'Calcul', lettre: 'Ca', barreTitre: $('#barre-titre'),
   formatsOuverture: [{ nom: 'Classeurs Excel', ext: ['xlsx', 'xlsm', 'xls'] }, { nom: 'Classeurs OpenDocument', ext: ['ods'] }, { nom: 'Fichiers CSV', ext: ['csv', 'tsv', 'txt'] }],
-  formatsEnregistrement: [{ nom: 'Classeur Excel', ext: 'xlsx', ecrire: ecrireXlsxActuel }, { nom: 'Classeur OpenDocument', ext: 'ods', ecrire: async () => ecrireOds(C, valeur) }, { nom: 'CSV (séparateur point-virgule)', ext: 'csv', ecrire: async () => ecrireCSV(F(), C.active, valeur) }],
+  formatsEnregistrement: [{ nom: 'Classeur Excel', ext: 'xlsx', ecrire: ecrireXlsxActuel }, { nom: 'Classeur Excel avec macros', ext: 'xlsm', ecrire: ecrireXlsmActuel }, { nom: 'Classeur OpenDocument', ext: 'ods', ecrire: async () => ecrireOds(C, valeur) }, { nom: 'CSV (séparateur point-virgule)', ext: 'csv', ecrire: async () => ecrireCSV(F(), C.active, valeur) }],
   exports: [
     { id: 'pdf', label: 'PDF', ico: 'file-type', desc: 'Ouvre l\'impression : choisissez « Microsoft Print to PDF » ou « Enregistrer au format PDF ».', faire: () => imprimer() },
-    { id: 'xlsx', label: 'Classeur Excel (.xlsx)', ico: 'sheet', ext: 'xlsx', desc: 'Compatible Microsoft Excel et LibreOffice Calc.', ecrire: ecrireXlsxActuel },
+    { id: 'xlsx', label: 'Classeur Excel (.xlsx)', ico: 'sheet', ext: 'xlsx', desc: 'Compatible Microsoft Excel et LibreOffice Calc. Sans macros.', ecrire: async () => { if (ORIGINE?.vba && !(await confirmer('Macros non exportées', 'Le fichier .xlsx exporté ne contiendra pas les macros VBA de ce classeur.', 'Exporter sans macros'))) throw new Error('export annulé'); return ecrireXlsxActuel(); } },
+    { id: 'xlsm', label: 'Classeur Excel avec macros (.xlsm)', ico: 'sheet', ext: 'xlsm', desc: 'Conserve à l\'identique le projet VBA du classeur d\'origine.', ecrire: ecrireXlsmActuel },
     { id: 'ods', label: 'Classeur OpenDocument (.ods)', ico: 'sheet', ext: 'ods', desc: 'Format ouvert, compatible LibreOffice Calc.', ecrire: async () => ecrireOds(C, valeur) },
     { id: 'csv', label: 'CSV (.csv)', ico: 'file-spreadsheet', ext: 'csv', desc: 'Feuille active, séparateur point-virgule, UTF-8.', ecrire: async () => ecrireCSV(F(), C.active, valeur) },
     { id: 'html', label: 'Page web (.html)', ico: 'globe', ext: 'html', desc: 'Tableau de la feuille active.', ecrire: async () => { preparerImpression(false); return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${esc(F().nom)}</title><style>table{border-collapse:collapse;font:13px Calibri,Arial,sans-serif}td{border:1px solid #ccc;padding:2px 6px}</style></head><body>${$('#zone-impression').innerHTML}</body></html>`; } },
@@ -1408,12 +1478,21 @@ const doc = creerDocument({
   // historique des versions partagé avec Dépannage (espace « classeurs »)
   historique: { espace: 'classeurs' },
   verifierOctets: verifierClasseur,
-  async nouveau(modele) { chargerClasseur((modele || MODELES[0]).creer()); },
+  avantEnregistrement: avantEnregistrementCalcul,
+  async nouveau(modele) { ORIGINE = null; pertesAcceptees.clear(); chargerClasseur((modele || MODELES[0]).creer()); afficherBarreMacros(); },
   async charger({ octets, ext }) {
     if (ext === 'xls') throw new Error('l\'ancien format .xls n\'est lu qu\'en partie : enregistrez-le d\'abord en .xlsx');
-    chargerClasseur(await lireClasseur(octets, ext));
+    const c = await lireClasseur(octets, ext);
+    ORIGINE = analyserOrigine(octets, ext); pertesAcceptees.clear();
+    chargerClasseur(c);
+    afficherBarreMacros();
   },
-  informations: async () => { let n = 0, fo = 0; C.feuilles.forEach(f => { n += f.cellules.size; for (const x of f.cellules.values()) if (x.f) fo++; }); return [['Feuilles', String(C.feuilles.length)], ['Cellules remplies', n.toLocaleString('fr-FR')], ['Formules', fo.toLocaleString('fr-FR')]]; },
+  informations: async () => { let n = 0, fo = 0; C.feuilles.forEach(f => { n += f.cellules.size; for (const x of f.cellules.values()) if (x.f) fo++; }); const inc = fonctionsNonPrisesEnCharge(), v = ORIGINE?.vba;
+    return [['Feuilles', String(C.feuilles.length)], ['Cellules remplies', n.toLocaleString('fr-FR')], ['Formules', fo.toLocaleString('fr-FR')],
+      ['Moteur de calcul', 'Calcul — moteur JavaScript intégré (formules en français), pas Microsoft Excel'],
+      ['Macros VBA', v ? `${v.projet.lisible ? v.projet.modules.length + ' module(s), ' : ''}conservées en .xlsm, jamais exécutées${v.signe ? ' — projet signé' : ''}${v.projet.protege ? ' — protégé par mot de passe' : ''}` : 'Aucune'],
+      ['Fonctions non prises en charge', inc.length ? inc.map(x => x.nom).join(', ') : 'Aucune'],
+      ...(ORIGINE?.pertes?.length ? [['Éléments non conservés à l\'enregistrement', ORIGINE.pertes.map(p => p.libelle).join(' ; ')]] : [])]; },
   annuler, retablir, imprimer,
   commandes: () => ruban.commandes(),
 });
@@ -1458,7 +1537,7 @@ zone.addEventListener('click', e => {
   const x = F().cellules.get(cle(+d.dataset.r, +d.dataset.c)); const m = x?.f && /^=LIEN_HYPERTEXTE\("([^"]+)"/i.exec(x.f); if (m) Fi.ouvrirLien(m[1]);
 });
 
-window.__calcul = { C: () => C, S, V, val, valeur, ecrire, selectionner, recalculer, toutRecalculer, doc, chargerClasseur, F, rendreMaintenant, apresModif, avant };
+window.__calcul = { origine: () => ORIGINE, fonctionsNonPrisesEnCharge, C: () => C, S, V, val, valeur, ecrire, selectionner, recalculer, toutRecalculer, doc, chargerClasseur, F, rendreMaintenant, apresModif, avant };
 (async () => {
   calculerGeometrie(); rendreOnglets();
   await doc.demarrer();

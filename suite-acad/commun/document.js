@@ -147,6 +147,8 @@ export function creerDocument(cfg) {
       const c = await F.appelApi('/api/fichier/choisir-enregistrement', { nomSuggere, filtres, titre: 'Enregistrer sous' });
       if (!c || c.annule) return null;
       chemin = c.chemin;
+      const ext = filtres?.[0]?.ext?.[0];
+      if (ext && ext !== '*' && extension(chemin) !== ext) chemin += '.' + ext;
     }
     const nom = chemin.split(/[\\/]/).pop();
     if (H && await F.fichierExiste(chemin)) {
