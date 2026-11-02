@@ -21,25 +21,24 @@ dans `.claude/skills/` et `.claude/commands/` — détail dans `.claude/vendor/t
 Workflow conseillé : `/define` (besoin) → `/design` (architecture) → implémentation, avec
 `/discuss` pour trancher les points un par un. Les documents produits vont dans `docs/`.
 
-## Équipe d'agents (obligatoire)
+## Équipe d'agents (sur demande, en fin de projet)
 
-Chaque production dans ce projet passe par une équipe complète, comme dans une vraie
-agence. Claude joue le **chef de projet** : il répartit le travail, lance les agents
-**en parallèle** (un seul message, plusieurs appels Agent), arbitre et fait la synthèse.
+Une équipe complète d'agents peut faire la **vérification finale** d'un projet, comme
+dans une vraie agence. Claude joue le **chef de projet** : il lance les agents **en
+parallèle** (un seul message, plusieurs appels Agent), arbitre et fait la synthèse.
 
-### Avant de produire (nouvelle page, fonctionnalité, refonte)
+### Quand demander (obligatoire)
 
-| Rôle | Agent |
-|---|---|
-| Product manager — besoin, étapes, risques | `ecc:planner` |
-| Architecte — structure, choix techniques | `ecc:architect` |
+- Ne **jamais** lancer l'équipe sans l'accord explicite de l'utilisateur.
+- Quand une production semble terminée (l'utilisateur dit que c'est fini, valide le
+  résultat, ou avant la livraison / le commit final / la PR), **poser la question** avec
+  l'outil AskUserQuestion : « Voulez-vous lancer l'équipe d'agents pour la vérification
+  finale ? » — options : *Oui, toute l'équipe* · *Oui, une partie (choisir les rôles)* · *Non*.
+- Poser la question **une fois par production**. Si la réponse est *Non*, ne pas la reposer
+  pour cette production.
+- L'utilisateur peut aussi la lancer lui-même à tout moment avec `/equipe`.
 
-Pour une simple correction, cette étape est facultative.
-
-### Après avoir produit — revue automatique par les agents
-
-Déclenchée par le hook `Stop` (`.claude/hooks/review-agents.sh`) dès que des fichiers ont
-changé. Toute l'équipe relit les changements en parallèle :
+### L'équipe
 
 | Rôle | Agent | Regarde |
 |---|---|---|
@@ -55,11 +54,15 @@ changé. Toute l'équipe relit les changements en parallèle :
 | Rédaction / marketing | `ecc:marketing-agent` | textes visibles, clarté, ton |
 | Documentation | `ecc:doc-updater` | README / docs à jour |
 
-Règles :
+En début de grosse production, Claude peut **proposer** (sans lancer) `ecc:planner`
+(product manager) et `ecc:architect` (architecte).
+
+### Règles de la vérification finale
+
 - Les relecteurs **rapportent**, le chef de projet **corrige** : appliquer tous les
   CRITICAL et HIGH, puis les MEDIUM raisonnables.
-- Un agent sans objet (ex. pas de JS modifié) répond « rien à signaler » — ne pas le
-  sauter en silence, l'indiquer dans le récapitulatif.
+- Un agent sans objet (ex. pas de JS) répond « rien à signaler » — l'indiquer dans le
+  récapitulatif plutôt que de le sauter en silence.
 - Si un agent `ecc:*` n'est pas disponible (plugin non chargé), lancer un agent
   `general-purpose` avec le même rôle et la même consigne.
 - Terminer par un tableau récapitulatif : rôle · verdict (✅ / ⚠️ / ❌) · ce qui a été corrigé.
