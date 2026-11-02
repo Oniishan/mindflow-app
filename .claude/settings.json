@@ -9,5 +9,18 @@
   },
   "enabledPlugins": {
     "ecc@ecc": true
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/review-agents.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
   }
 }
